@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import { saveGemSnapshot, monthKey } from '../lib/storage'
+import { OCEAN_TIERS, DEFAULT_TIER, type TierName } from '../lib/tiers'
 import type { GemSnapshot } from '../lib/types'
 
 interface Props {
-  onComplete: (snapshot: GemSnapshot) => void
+  onComplete: (snapshot: GemSnapshot, tier: TierName) => void
 }
 
+type Step = 'tier' | 'explain' | 'form'
+
 export function GemOnboardingModal({ onComplete }: Props) {
-  const [step, setStep] = useState<'explain' | 'form'>('explain')
+  const [step, setStep] = useState<Step>('tier')
+  const [selectedTier, setSelectedTier] = useState<TierName>(DEFAULT_TIER)
   const [balance, setBalance] = useState('')
   const [redeemed, setRedeemed] = useState('')
   const [loading, setLoading] = useState(false)
@@ -30,7 +34,7 @@ export function GemOnboardingModal({ onComplete }: Props) {
         recordedAt: Date.now(),
       }
       await saveGemSnapshot(snapshot)
-      onComplete({ ...snapshot, id: snapshot.month })
+      onComplete({ ...snapshot, id: snapshot.month }, selectedTier)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save. Try again.')
     } finally {
@@ -42,10 +46,62 @@ export function GemOnboardingModal({ onComplete }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
       <div className="w-full max-w-md bg-[#1a1a1a] border border-gray-800 rounded-xl p-6 shadow-2xl">
 
-        {step === 'explain' ? (
+        {/* Step 1: Tier selection */}
+        {step === 'tier' && (
           <>
-            {/* Explanation step */}
             <div className="mb-6">
+              <h2 className="text-white font-mono text-base mb-1">Your Ocean Rewards tier</h2>
+              <p className="text-gray-500 text-xs mb-4">
+                Select your current tier — this sets your rakeback rate and GEM multiplier.
+                You can update it anytime in account settings.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {OCEAN_TIERS.map(t => (
+                  <button
+                    key={t.name}
+                    onClick={() => setSelectedTier(t.name)}
+                    className={`px-3 py-1.5 rounded text-xs font-mono border transition-colors ${
+                      selectedTier === t.name
+                        ? 'border-accent text-accent bg-accent/10'
+                        : 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300'
+                    }`}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+              {(() => {
+                const cfg = OCEAN_TIERS.find(t => t.name === selectedTier)!
+                return (
+                  <div className="mt-4 p-3 rounded bg-[#0f0f0f] border border-gray-800 text-xs font-mono">
+                    <span className="text-accent">{selectedTier}</span>
+                    <span className="text-gray-600 mx-2">·</span>
+                    <span className="text-gray-400">{Math.round(cfg.pct * 100)}% rakeback</span>
+                    <span className="text-gray-600 mx-2">·</span>
+                    <span className="text-gray-400">x{cfg.multiplier} GEM multiplier</span>
+                  </div>
+                )
+              })()}
+            </div>
+            <button
+              onClick={() => setStep('explain')}
+              className="w-full py-2.5 rounded bg-accent text-black text-sm font-mono font-semibold hover:bg-accent/90 transition-colors"
+            >
+              Next →
+            </button>
+          </>
+        )}
+
+        {/* Step 2: Explain GEM baseline */}
+        {step === 'explain' && (
+          <>
+            <div className="mb-6">
+              <button
+                onClick={() => setStep('tier')}
+                className="text-xs text-gray-600 hover:text-gray-400 transition-colors mb-3 block"
+              >
+                ← Back
+              </button>
               <h2 className="text-white font-mono text-base mb-3">One last thing</h2>
               <div className="space-y-3 text-sm text-gray-400 leading-relaxed">
                 <p>
@@ -62,7 +118,6 @@ export function GemOnboardingModal({ onComplete }: Props) {
                 </p>
               </div>
             </div>
-
             <button
               onClick={() => setStep('form')}
               className="w-full py-2.5 rounded bg-accent text-black text-sm font-mono font-semibold hover:bg-accent/90 transition-colors"
@@ -70,9 +125,11 @@ export function GemOnboardingModal({ onComplete }: Props) {
               Set my baseline →
             </button>
           </>
-        ) : (
+        )}
+
+        {/* Step 3: GEM baseline form */}
+        {step === 'form' && (
           <>
-            {/* Form step */}
             <div className="mb-5">
               <button
                 onClick={() => setStep('explain')}

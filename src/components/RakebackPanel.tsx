@@ -1,22 +1,12 @@
-import { useState } from 'react'
 import type { SessionResult, GemSnapshot } from '../lib/types'
 import { monthKey, prevMonthKey } from '../lib/storage'
+import { getTierConfig, type TierName } from '../lib/tiers'
 
 interface Props {
   result: SessionResult
   snapshots: GemSnapshot[]
+  tier: TierName
 }
-
-// Ocean Rewards tiers and their rakeback percentages
-const TIERS = [
-  { name: 'Fish',   pct: 0.10 },
-  { name: 'Bronze', pct: 0.15 },
-  { name: 'Silver', pct: 0.20 },
-  { name: 'Gold',   pct: 0.25 },
-  { name: 'Shark',  pct: 0.30 },
-] as const
-
-type TierName = typeof TIERS[number]['name']
 
 const GEMS_PER_DOLLAR = 1000
 
@@ -32,10 +22,9 @@ function monthLabel(key: string): string {
   return `${MONTH_NAMES[month - 1]} ${year}`
 }
 
-export function RakebackPanel({ result, snapshots }: Props) {
-  const [tier, setTier] = useState<TierName>('Bronze')
-
-  const tierPct = TIERS.find(t => t.name === tier)?.pct ?? 0.15
+export function RakebackPanel({ result, snapshots, tier }: Props) {
+  const tierCfg = getTierConfig(tier)
+  const tierPct = tierCfg.pct
   const rakeEstimate = result.totalHeroRake
   const rakeback = rakeEstimate * tierPct
 
@@ -95,28 +84,21 @@ export function RakebackPanel({ result, snapshots }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
 
-        {/* Tier selector */}
+        {/* Tier display (read-only — update via account settings) */}
         <div>
           <label className="block text-xs text-gray-500 mb-2">Ocean Rewards Tier</label>
-          <div className="flex flex-wrap gap-2">
-            {TIERS.map(t => (
-              <button
-                key={t.name}
-                onClick={() => setTier(t.name)}
-                className={`px-3 py-1 rounded text-xs font-mono border transition-colors ${
-                  tier === t.name
-                    ? 'border-accent text-accent bg-accent/10'
-                    : 'border-gray-700 text-gray-500 hover:border-gray-500'
-                }`}
-              >
-                {t.name} {Math.round(t.pct * 100)}%
-              </button>
-            ))}
+          <div className="p-3 rounded bg-[#0f0f0f] border border-gray-800 text-xs font-mono">
+            <span className="text-accent">{tier}</span>
+            <span className="text-gray-600 mx-2">·</span>
+            <span className="text-gray-400">{Math.round(tierPct * 100)}% rakeback</span>
+            <span className="text-gray-600 mx-2">·</span>
+            <span className="text-gray-400">x{tierCfg.multiplier} GEMs</span>
           </div>
+          <p className="text-xs text-gray-700 mt-1.5">Update in account settings</p>
 
           {/* Current GEM balance from latest snapshot */}
           {latestSnapshot && (
-            <div className="mt-4 p-3 rounded bg-[#0f0f0f] border border-gray-800">
+            <div className="mt-3 p-3 rounded bg-[#0f0f0f] border border-gray-800">
               <p className="text-xs text-gray-600 mb-1">GEM Balance ({monthLabel(latestSnapshot.month)})</p>
               <p className="text-sm font-mono text-white">{latestSnapshot.balance.toLocaleString()} GEMs</p>
               <p className="text-xs text-gray-600 mt-0.5">${(latestSnapshot.balance / GEMS_PER_DOLLAR).toFixed(2)} unredeemed value</p>

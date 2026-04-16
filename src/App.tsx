@@ -3,6 +3,7 @@ import { splitHands } from './lib/splitHands'
 import { parseSessionHand } from './lib/parseSessionHand'
 import { analyseSession } from './lib/analyseSession'
 import { rawToHand, handToRaw, createRecord, loadCloudRecords, saveCloudRecord, deleteCloudRecord, loadGemSnapshots, shouldShowGemCheckIn } from './lib/storage'
+import { DEFAULT_TIER, type TierName } from './lib/tiers'
 import type { SessionRecord, SessionResult, GemSnapshot } from './lib/types'
 import { SessionLibrary } from './components/SessionLibrary'
 import { LifetimeDashboard } from './components/LifetimeDashboard'
@@ -13,6 +14,7 @@ import { RakebackPanel } from './components/RakebackPanel'
 import { AuthPage } from './components/AuthPage'
 import { GemCheckInModal } from './components/GemCheckInModal'
 import { GemOnboardingModal } from './components/GemOnboardingModal'
+import { SettingsModal } from './components/SettingsModal'
 import { supabase } from './lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
@@ -31,6 +33,8 @@ export default function App() {
   const [gemSnapshots, setGemSnapshots] = useState<GemSnapshot[]>([])
   const [showGemCheckIn, setShowGemCheckIn] = useState(false)
   const [showGemOnboarding, setShowGemOnboarding] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [tier, setTier] = useState<TierName>(DEFAULT_TIER)
   const inputRef = useRef<HTMLInputElement>(null)
 
   // ── Auth state ──────────────────────────────────────────────────────────────
@@ -53,8 +57,13 @@ export default function App() {
       setRecords([])
       setGemSnapshots([])
       setShowGemCheckIn(false)
+      setTier(DEFAULT_TIER)
       return
     }
+    // Restore tier from user metadata
+    const savedTier = user.user_metadata?.tier as TierName | undefined
+    if (savedTier) setTier(savedTier)
+
     setCloudError(null)
     Promise.all([loadCloudRecords(), loadGemSnapshots()])
       .then(([recs, snaps]) => {
@@ -212,6 +221,17 @@ export default function App() {
     setView('library')
   }
 
+  const saveTierToAccount = async (newTier: TierName) => {
+    const { data, error } = await supabase.auth.updateUser({ data: { tier: newTier } })
+    if (error) throw error
+    setTier(newTier)
+    // Sync local state with the updated user object if returned
+    if (data.user) {
+      const confirmed = data.user.user_metadata?.tier as TierName | undefined
+      if (confirmed) setTier(confirmed)
+    }
+  }
+
   // ── Loading / Auth gates ────────────────────────────────────────────────────
   if (authLoading) {
     return (
@@ -230,14 +250,24 @@ export default function App() {
     <div className="min-h-screen bg-bg text-gray-100">
       {showGemOnboarding && (
         <GemOnboardingModal
-          onComplete={snapshot => {
+          onComplete={async (snapshot, selectedTier) => {
             setGemSnapshots(prev => {
               const filtered = prev.filter(s => s.month !== snapshot.month)
               return [snapshot, ...filtered]
             })
             setShowGemOnboarding(false)
             setShowGemCheckIn(false) // don't double-prompt this month
+            // Persist tier to user account
+            await saveTierToAccount(selectedTier)
           }}
+        />
+      )}
+      {showSettings && user && (
+        <SettingsModal
+          currentTier={tier}
+          userEmail={user.email ?? ''}
+          onSave={saveTierToAccount}
+          onClose={() => setShowSettings(false)}
         />
       )}
       {showGemCheckIn && !showGemOnboarding && (
@@ -264,15 +294,23 @@ export default function App() {
           onChange={e => { if (e.target.files?.length) processFiles(e.target.files) }}
         />
 
-        {/* Header bar with user info + sign out */}
+        {/* Header bar with user info + settings + sign out */}
         <div className="flex items-center justify-between mb-6">
           <span className="text-xs font-mono text-gray-600">{user.email}</span>
-          <button
-            onClick={handleSignOut}
-            className="text-xs font-mono text-gray-600 hover:text-gray-400 transition-colors"
-          >
-            Sign out
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowSettings(true)}
+              className="text-xs font-mono text-gray-600 hover:text-gray-400 transition-colors"
+            >
+              Settings
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="text-xs font-mono text-gray-600 hover:text-gray-400 transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
 
         {/* Cloud error banner */}
@@ -302,6 +340,7 @@ export default function App() {
               <LifetimeDashboard
                 records={records}
                 snapshots={gemSnapshots}
+                tier={tier}
                 onView={handleView}
                 onDelete={handleDelete}
                 onUpload={() => inputRef.current?.click()}
@@ -377,7 +416,7 @@ export default function App() {
             <SummaryStrip result={activeResult} />
             <SessionGraph result={activeResult} />
             <PositionTable result={activeResult} />
-            <RakebackPanel result={activeResult} snapshots={gemSnapshots} />
+            <RakebackPanel result={activeResult} snapshots={gemSnapshots} tier={tier} />
           </>
         )}
       </div>

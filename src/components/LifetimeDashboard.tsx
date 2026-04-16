@@ -1,36 +1,21 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { SessionRecord, SessionResult, GemSnapshot } from '../lib/types'
 import { rawToHand } from '../lib/storage'
 import { analyseSession } from '../lib/analyseSession'
+import { getTierConfig, type TierName } from '../lib/tiers'
 import { SessionGraph } from './SessionGraph'
 import { SessionLibrary } from './SessionLibrary'
 
 interface Props {
   records: SessionRecord[]
   snapshots: GemSnapshot[]
+  tier: TierName
   onView: (recordId: string, stakeKey: string | null) => void
   onDelete: (recordId: string) => void
   onUpload: () => void
 }
 
-const TIERS = [
-  { name: 'Fish',   pct: 0.10 },
-  { name: 'Bronze', pct: 0.15 },
-  { name: 'Silver', pct: 0.20 },
-  { name: 'Gold',   pct: 0.25 },
-  { name: 'Shark',  pct: 0.30 },
-] as const
-type TierName = typeof TIERS[number]['name']
-
 const GEMS_PER_DOLLAR = 1000
-
-function getTier(): TierName {
-  return (localStorage.getItem('plo-rakeback-tier') as TierName) ?? 'Bronze'
-}
-
-function saveTier(t: TierName) {
-  localStorage.setItem('plo-rakeback-tier', t)
-}
 
 function sign(n: number): string {
   return n >= 0 ? `+$${n.toFixed(2)}` : `-$${Math.abs(n).toFixed(2)}`
@@ -62,14 +47,7 @@ function Card({
   )
 }
 
-export function LifetimeDashboard({ records, snapshots, onView, onDelete, onUpload }: Props) {
-  const [tier, setTierState] = useState<TierName>(getTier)
-
-  function setTier(t: TierName) {
-    saveTier(t)
-    setTierState(t)
-  }
-
+export function LifetimeDashboard({ records, snapshots, tier, onView, onDelete, onUpload }: Props) {
   // Combine all hands across all records into one lifetime result
   const lifetimeResult: SessionResult | null = useMemo(() => {
     if (records.length === 0) return null
@@ -82,8 +60,7 @@ export function LifetimeDashboard({ records, snapshots, onView, onDelete, onUplo
     const sorted = [...snapshots].sort((a, b) => a.month.localeCompare(b.month))
     let total = 0
     for (let i = 1; i < sorted.length; i++) {
-      const earned = sorted[i].redeemed
-      total += earned / GEMS_PER_DOLLAR
+      total += sorted[i].redeemed / GEMS_PER_DOLLAR
     }
     return total
   }, [snapshots])
@@ -96,8 +73,8 @@ export function LifetimeDashboard({ records, snapshots, onView, onDelete, onUplo
     dollarsPerHour, durationMinutes, stakes,
   } = lifetimeResult
 
-  const tierPct = TIERS.find(t => t.name === tier)?.pct ?? 0.15
-  const rakeback = totalHeroRake * tierPct
+  const tierCfg = getTierConfig(tier)
+  const rakeback = totalHeroRake * tierCfg.pct
   const primaryBB = stakes.length > 0
     ? stakes.reduce((best, s) => s.bb > best ? s.bb : best, 0)
     : 0.5
@@ -164,29 +141,17 @@ export function LifetimeDashboard({ records, snapshots, onView, onDelete, onUplo
           value={handsPlayed.toLocaleString()}
           sub={`${records.length} session${records.length !== 1 ? 's' : ''}`}
         />
-        {/* True BB/100 tile with inline tier selector */}
+
+        {/* True BB/100 tile — static tier display, no inline selector */}
         <div className="bg-[#1a1a1a] rounded p-4 flex flex-col gap-1 min-w-0">
           <span className="text-xs text-gray-500 uppercase tracking-wider">True BB/100</span>
           <span className={`font-mono text-xl ${trueColor}`}>
             {trueBB100 >= 0 ? '+' : ''}{trueBB100.toFixed(1)}
           </span>
           <span className="text-xs text-gray-600 font-mono">incl. rakeback + GEMs</span>
-          {/* Tier pills */}
-          <div className="flex flex-wrap gap-1 mt-1.5">
-            {TIERS.map(t => (
-              <button
-                key={t.name}
-                onClick={() => setTier(t.name)}
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
-                  tier === t.name
-                    ? 'border-accent text-accent bg-accent/10'
-                    : 'border-gray-800 text-gray-700 hover:border-gray-600 hover:text-gray-500'
-                }`}
-              >
-                {t.name}
-              </button>
-            ))}
-          </div>
+          <span className="text-xs text-gray-700 font-mono mt-0.5">
+            {tier} · x{tierCfg.multiplier}
+          </span>
         </div>
       </div>
 
