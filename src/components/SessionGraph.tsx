@@ -1,0 +1,130 @@
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ReferenceLine,
+} from 'recharts'
+import type { SessionResult } from '../lib/types'
+
+interface Props {
+  result: SessionResult
+}
+
+type DataPoint = SessionResult['cumulativePnL'][number]
+
+function CustomTooltip({
+  active,
+  payload,
+  hasEV,
+}: {
+  active?: boolean
+  payload?: Array<{ payload: DataPoint; dataKey: string; color: string; value: number }>
+  hasEV: boolean
+}) {
+  if (!active || !payload?.length || !payload[0].payload) return null
+  const d = payload[0].payload
+
+  const netColor = d.cumNet >= 0 ? '#4ade80' : '#f87171'
+  const fmt = (n: number) => `${n >= 0 ? '+' : ''}$${Math.abs(n).toFixed(2)}`
+
+  return (
+    <div className="bg-[#1a1a1a] border border-gray-700 rounded px-3 py-2 text-xs font-mono space-y-1">
+      <div className="text-gray-400">Hand #{d.handIndex}</div>
+      <div style={{ color: netColor }} className="text-sm font-semibold">
+        {fmt(d.cumNet)} <span className="text-gray-500 font-normal text-xs">actual</span>
+      </div>
+      {hasEV && d.cumEV !== d.cumNet && (
+        <div style={{ color: '#2dd4bf' }} className="text-sm font-semibold">
+          {fmt(d.cumEV)} <span className="text-gray-500 font-normal text-xs">EV</span>
+        </div>
+      )}
+      <div className="text-gray-600">{d.tableId}</div>
+    </div>
+  )
+}
+
+export function SessionGraph({ result }: Props) {
+  const data = result.cumulativePnL
+  if (data.length === 0) return null
+
+  const hasEV = result.hasEVData
+
+  const allValues = data.flatMap(d => hasEV ? [d.cumNet, d.cumEV] : [d.cumNet])
+  const maxAbs = Math.max(...allValues.map(Math.abs), 0.01)
+  const yDomain = [-maxAbs * 1.15, maxAbs * 1.15]
+
+  const finalNet = data[data.length - 1]?.cumNet ?? 0
+  const actualColor = finalNet >= 0 ? '#4ade80' : '#f87171'
+  const evColor = '#2dd4bf'
+
+  return (
+    <div className="bg-[#1a1a1a] rounded-lg p-6 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xs text-gray-500 uppercase tracking-wider">Session Graph</h2>
+        {hasEV && (
+          <div className="flex items-center gap-4 text-xs font-mono">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-4 h-0.5" style={{ backgroundColor: actualColor }} />
+              <span className="text-gray-400">Actual</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-4 border-t border-dashed" style={{ borderColor: evColor }} />
+              <span className="text-gray-400">EV</span>
+            </span>
+          </div>
+        )}
+      </div>
+
+      <ResponsiveContainer width="100%" height={280}>
+        <LineChart data={data} margin={{ top: 4, right: 16, left: 8, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+          <XAxis
+            dataKey="handIndex"
+            tick={{ fill: '#6b7280', fontSize: 11 }}
+            tickLine={false}
+            axisLine={{ stroke: '#374151' }}
+            label={{ value: 'Hand', position: 'insideBottomRight', offset: -8, fill: '#4b5563', fontSize: 11 }}
+          />
+          <YAxis
+            domain={yDomain}
+            tick={{ fill: '#6b7280', fontSize: 11 }}
+            tickLine={false}
+            axisLine={{ stroke: '#374151' }}
+            tickFormatter={v => `$${v.toFixed(0)}`}
+          />
+          <Tooltip content={<CustomTooltip hasEV={hasEV} />} />
+          <ReferenceLine y={0} stroke="#374151" strokeDasharray="4 2" />
+
+          {/* Actual P&L line */}
+          <Line
+            type="monotone"
+            dataKey="cumNet"
+            stroke={actualColor}
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 4, fill: actualColor, stroke: '#0f0f0f', strokeWidth: 2 }}
+            isAnimationActive={false}
+          />
+
+          {/* EV line — only rendered when all-in EV data exists */}
+          {hasEV && (
+            <Line
+              type="monotone"
+              dataKey="cumEV"
+              stroke={evColor}
+              strokeWidth={1.5}
+              strokeDasharray="6 3"
+              dot={false}
+              activeDot={{ r: 3, fill: evColor, stroke: '#0f0f0f', strokeWidth: 2 }}
+              isAnimationActive={false}
+            />
+          )}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
