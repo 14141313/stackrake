@@ -12,6 +12,7 @@ import type { SessionResult } from '../lib/types'
 
 interface Props {
   result: SessionResult
+  title?: string
 }
 
 type DataPoint = SessionResult['cumulativePnL'][number]
@@ -47,7 +48,7 @@ function CustomTooltip({
   )
 }
 
-export function SessionGraph({ result }: Props) {
+export function SessionGraph({ result, title = 'Session Graph' }: Props) {
   const data = result.cumulativePnL
   if (data.length === 0) return null
 
@@ -64,7 +65,7 @@ export function SessionGraph({ result }: Props) {
   return (
     <div className="bg-[#1a1a1a] rounded-lg p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xs text-gray-500 uppercase tracking-wider">Session Graph</h2>
+        <h2 className="text-xs text-gray-500 uppercase tracking-wider">{title}</h2>
         {hasEV && (
           <div className="flex items-center gap-4 text-xs font-mono">
             <span className="flex items-center gap-1.5">
@@ -80,14 +81,14 @@ export function SessionGraph({ result }: Props) {
       </div>
 
       <ResponsiveContainer width="100%" height={280}>
-        <LineChart data={data} margin={{ top: 4, right: 16, left: 8, bottom: 4 }}>
+        <LineChart data={data} margin={{ top: 4, right: 40, left: 10, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
           <XAxis
             dataKey="handIndex"
             tick={{ fill: '#6b7280', fontSize: 11 }}
             tickLine={false}
             axisLine={{ stroke: '#374151' }}
-            label={{ value: 'Hand', position: 'insideBottomRight', offset: -8, fill: '#4b5563', fontSize: 11 }}
+            label={{ value: 'Hand', position: 'insideBottom', offset: -10, fill: '#4b5563', fontSize: 11 }}
           />
           <YAxis
             domain={yDomain}
@@ -95,6 +96,7 @@ export function SessionGraph({ result }: Props) {
             tickLine={false}
             axisLine={{ stroke: '#374151' }}
             tickFormatter={v => `$${v.toFixed(0)}`}
+            width={50}
           />
           <Tooltip content={<CustomTooltip hasEV={hasEV} />} />
           <ReferenceLine y={0} stroke="#374151" strokeDasharray="4 2" />

@@ -191,7 +191,7 @@ export function LifetimeDashboard({ records, snapshots, onView, onDelete, onUplo
       </div>
 
       {/* Lifetime cumulative graph */}
-      <SessionGraph result={lifetimeResult} />
+      <SessionGraph result={lifetimeResult} title="Lifetime Graph" />
 
       {/* Session table */}
       <SessionLibrary
