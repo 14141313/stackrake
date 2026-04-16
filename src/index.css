@@ -2,8 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-color: #ffffff;
-  color: #111827;
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  :root {
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  html {
+    font-family: 'InterVariable', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #111827;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
