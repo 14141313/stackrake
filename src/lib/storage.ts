@@ -1,4 +1,4 @@
-import type { SessionRecord, SessionHand, RawHand } from './types'
+import type { SessionRecord, SessionHand, RawHand, GemSnapshot } from './types'
 import { supabase } from './supabase'
 
 // ── Cloud CRUD (Supabase) ─────────────────────────────────────────────────────
@@ -36,6 +36,59 @@ export async function saveCloudRecord(record: SessionRecord): Promise<void> {
 export async function deleteCloudRecord(id: string): Promise<void> {
   const { error } = await supabase.from('sessions').delete().eq('id', id)
   if (error) throw error
+}
+
+// ── GEM snapshot CRUD ─────────────────────────────────────────────────────────
+
+export async function loadGemSnapshots(): Promise<GemSnapshot[]> {
+  const { data, error } = await supabase
+    .from('gem_snapshots')
+    .select('*')
+    .order('month', { ascending: false })
+  if (error) throw error
+  return (data ?? []).map(row => ({
+    id: row.id,
+    month: row.month,
+    balance: row.balance,
+    redeemed: row.redeemed,
+    recordedAt: row.recorded_at,
+  }))
+}
+
+export async function saveGemSnapshot(snapshot: Omit<GemSnapshot, 'id'>): Promise<void> {
+  const { data, error: authError } = await supabase.auth.getUser()
+  if (authError || !data.user) throw new Error('Not authenticated')
+  const { error } = await supabase.from('gem_snapshots').upsert({
+    user_id: data.user.id,
+    month: snapshot.month,
+    balance: snapshot.balance,
+    redeemed: snapshot.redeemed,
+    recorded_at: snapshot.recordedAt,
+  }, { onConflict: 'user_id,month' })
+  if (error) throw error
+}
+
+/** Returns 'YYYY-MM' for a given Date (defaults to today). */
+export function monthKey(date = new Date()): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+/** Returns 'YYYY-MM' for the previous month. */
+export function prevMonthKey(date = new Date()): string {
+  const d = new Date(date.getFullYear(), date.getMonth() - 1, 1)
+  return monthKey(d)
+}
+
+/**
+ * Returns true if the monthly GEM check-in should be shown.
+ * Triggers within the first 7 days of a new month when no snapshot
+ * exists for the current month yet.
+ */
+export function shouldShowGemCheckIn(snapshots: GemSnapshot[]): boolean {
+  const today = new Date()
+  if (today.getDate() > 7) return false
+  const current = monthKey(today)
+  return !snapshots.some(s => s.month === current)
 }
 
 const STORAGE_KEY = 'plo-tracker-sessions'

@@ -32,6 +32,17 @@ export interface SessionHand {
   totalPot: number
 }
 
+// ── GEM snapshots ─────────────────────────────────────────────────────────────
+
+/** One monthly GEM balance check-in. */
+export interface GemSnapshot {
+  id: string
+  month: string      // 'YYYY-MM'
+  balance: number    // GEM balance at start of this month (= end of last month)
+  redeemed: number   // GEMs redeemed during last month
+  recordedAt: number // Date.now()
+}
+
 // ── Session persistence ───────────────────────────────────────────────────────
 
 /**

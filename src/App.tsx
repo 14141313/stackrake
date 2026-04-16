@@ -2,14 +2,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { splitHands } from './lib/splitHands'
 import { parseSessionHand } from './lib/parseSessionHand'
 import { analyseSession } from './lib/analyseSession'
-import { rawToHand, createRecord, loadCloudRecords, saveCloudRecord, deleteCloudRecord } from './lib/storage'
-import type { SessionRecord, SessionResult } from './lib/types'
+import { rawToHand, createRecord, loadCloudRecords, saveCloudRecord, deleteCloudRecord, loadGemSnapshots, shouldShowGemCheckIn } from './lib/storage'
+import type { SessionRecord, SessionResult, GemSnapshot } from './lib/types'
 import { SessionLibrary } from './components/SessionLibrary'
 import { SummaryStrip } from './components/SummaryStrip'
 import { SessionGraph } from './components/SessionGraph'
 import { PositionTable } from './components/PositionTable'
 import { RakebackPanel } from './components/RakebackPanel'
 import { AuthPage } from './components/AuthPage'
+import { GemCheckInModal } from './components/GemCheckInModal'
 import { supabase } from './lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
@@ -25,6 +26,8 @@ export default function App() {
   const [uploading, setUploading] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [cloudError, setCloudError] = useState<string | null>(null)
+  const [gemSnapshots, setGemSnapshots] = useState<GemSnapshot[]>([])
+  const [showGemCheckIn, setShowGemCheckIn] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   // ── Auth state ──────────────────────────────────────────────────────────────
@@ -41,16 +44,22 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // ── Load cloud records when user logs in ────────────────────────────────────
+  // ── Load cloud records + GEM snapshots when user logs in ───────────────────
   useEffect(() => {
     if (!user) {
       setRecords([])
+      setGemSnapshots([])
+      setShowGemCheckIn(false)
       return
     }
     setCloudError(null)
-    loadCloudRecords()
-      .then(setRecords)
-      .catch(err => setCloudError(err.message ?? 'Failed to load sessions'))
+    Promise.all([loadCloudRecords(), loadGemSnapshots()])
+      .then(([recs, snaps]) => {
+        setRecords(recs)
+        setGemSnapshots(snaps)
+        setShowGemCheckIn(shouldShowGemCheckIn(snaps))
+      })
+      .catch(err => setCloudError(err.message ?? 'Failed to load data'))
   }, [user])
 
   // ── Duplicate detection ─────────────────────────────────────────────────────
@@ -186,6 +195,18 @@ export default function App() {
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-bg text-gray-100">
+      {showGemCheckIn && (
+        <GemCheckInModal
+          onComplete={snapshot => {
+            setGemSnapshots(prev => {
+              const filtered = prev.filter(s => s.month !== snapshot.month)
+              return [snapshot, ...filtered]
+            })
+            setShowGemCheckIn(false)
+          }}
+          onDismiss={() => setShowGemCheckIn(false)}
+        />
+      )}
       <div className="max-w-5xl mx-auto px-4 py-8">
 
         {/* Hidden global file input */}
@@ -301,7 +322,7 @@ export default function App() {
             <SummaryStrip result={activeResult} />
             <SessionGraph result={activeResult} />
             <PositionTable result={activeResult} />
-            <RakebackPanel result={activeResult} />
+            <RakebackPanel result={activeResult} snapshots={gemSnapshots} />
           </>
         )}
       </div>
