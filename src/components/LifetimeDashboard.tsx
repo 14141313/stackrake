@@ -38,9 +38,9 @@ function Card({
   children?: React.ReactNode
 }) {
   return (
-    <div className="bg-[#1a1a1a] rounded p-4 flex flex-col gap-1 min-w-0">
+    <div className="bg-white rounded-xl p-4 flex flex-col gap-1 min-w-0 border border-gray-100 shadow-sm">
       <span className="text-xs text-gray-500 uppercase tracking-wider">{label}</span>
-      <span className={`font-mono text-xl ${valueColor ?? 'text-white'}`}>{value}</span>
+      <span className={`font-mono text-xl ${valueColor ?? 'text-gray-900'}`}>{value}</span>
       {sub && <span className="text-xs text-gray-500 font-mono">{sub}</span>}
       {children}
     </div>
@@ -88,24 +88,24 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onDelete, 
   const vpipPct = handsPlayed > 0 ? Math.round((vpipHands / handsPlayed) * 100) : 0
   const stakeLabel = stakes.map(s => `$${s.sb}/$${s.bb}`).join(', ')
 
-  const netColor = netResult > 0 ? 'text-pos' : netResult < 0 ? 'text-neg' : 'text-white'
-  const bbColor = bbPer100 > 0 ? 'text-pos' : bbPer100 < 0 ? 'text-neg' : 'text-white'
-  const hrColor = dollarsPerHour > 0 ? 'text-pos' : dollarsPerHour < 0 ? 'text-neg' : 'text-white'
-  const trueColor = trueBB100 > 0 ? 'text-pos' : trueBB100 < 0 ? 'text-neg' : 'text-white'
+  const netColor = netResult > 0 ? 'text-positive' : netResult < 0 ? 'text-negative' : 'text-gray-900'
+  const bbColor = bbPer100 > 0 ? 'text-positive' : bbPer100 < 0 ? 'text-negative' : 'text-gray-900'
+  const hrColor = dollarsPerHour > 0 ? 'text-positive' : dollarsPerHour < 0 ? 'text-negative' : 'text-gray-900'
+  const trueColor = trueBB100 > 0 ? 'text-positive' : trueBB100 < 0 ? 'text-negative' : 'text-gray-900'
 
   return (
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-mono text-white">Dashboard</h1>
+          <h1 className="text-lg font-mono text-gray-900">Dashboard</h1>
           <p className="text-xs text-gray-500 mt-0.5">
             {handsPlayed.toLocaleString()} hands · {fmtDuration(durationMinutes)} · {records.length} session{records.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button
           onClick={onUpload}
-          className="px-4 py-2 rounded border border-accent/50 text-accent text-xs font-mono hover:bg-accent/10 transition-colors"
+          className="px-4 py-2 rounded-lg border border-brand text-brand text-xs font-mono hover:bg-brand-light transition-colors"
         >
           + Upload Session
         </button>
@@ -135,21 +135,23 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onDelete, 
           label="Rake Paid"
           value={`$${totalHeroRake.toFixed(2)}`}
           sub={`VPIP ${vpipPct}% · ${vpipHands}/${handsPlayed}`}
+          valueColor="text-brand"
         />
         <Card
           label="Hands"
           value={handsPlayed.toLocaleString()}
           sub={`${records.length} session${records.length !== 1 ? 's' : ''}`}
+          valueColor="text-brand"
         />
 
         {/* True BB/100 tile — static tier display, no inline selector */}
-        <div className="bg-[#1a1a1a] rounded p-4 flex flex-col gap-1 min-w-0">
+        <div className="bg-white rounded-xl p-4 flex flex-col gap-1 min-w-0 border border-gray-100 shadow-sm">
           <span className="text-xs text-gray-500 uppercase tracking-wider">True BB/100</span>
           <span className={`font-mono text-xl ${trueColor}`}>
             {trueBB100 >= 0 ? '+' : ''}{trueBB100.toFixed(1)}
           </span>
-          <span className="text-xs text-gray-600 font-mono">incl. rakeback + GEMs</span>
-          <span className="text-xs text-gray-700 font-mono mt-0.5">
+          <span className="text-xs text-gray-500 font-mono">incl. rakeback + GEMs</span>
+          <span className="text-xs text-brand/70 font-mono mt-0.5">
             {tier} · x{tierCfg.multiplier}
           </span>
         </div>

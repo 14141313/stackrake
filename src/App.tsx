@@ -235,7 +235,7 @@ export default function App() {
   // ── Loading / Auth gates ────────────────────────────────────────────────────
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-bg">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <p className="text-gray-500 font-mono text-sm animate-pulse">Loading…</p>
       </div>
     )
@@ -247,7 +247,7 @@ export default function App() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-bg text-gray-100">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       {showGemOnboarding && (
         <GemOnboardingModal
           onComplete={async (snapshot, selectedTier) => {
@@ -296,17 +296,17 @@ export default function App() {
 
         {/* Header bar with user info + settings + sign out */}
         <div className="flex items-center justify-between mb-6">
-          <span className="text-xs font-mono text-gray-600">{user.email}</span>
+          <span className="text-xs font-mono text-gray-500">{user.email}</span>
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowSettings(true)}
-              className="text-xs font-mono text-gray-600 hover:text-gray-400 transition-colors"
+              className="text-xs font-mono text-gray-400 hover:text-gray-700 transition-colors"
             >
               Settings
             </button>
             <button
               onClick={handleSignOut}
-              className="text-xs font-mono text-gray-600 hover:text-gray-400 transition-colors"
+              className="text-xs font-mono text-gray-400 hover:text-gray-700 transition-colors"
             >
               Sign out
             </button>
@@ -315,9 +315,9 @@ export default function App() {
 
         {/* Cloud error banner */}
         {cloudError && (
-          <div className="mb-4 px-3 py-2 rounded bg-red-950/30 border border-red-900/40 text-xs text-red-400 font-mono flex items-center justify-between">
+          <div className="mb-4 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600 font-mono flex items-center justify-between">
             <span>{cloudError}</span>
-            <button onClick={() => setCloudError(null)} className="ml-4 hover:text-red-300">✕</button>
+            <button onClick={() => setCloudError(null)} className="ml-4 hover:text-red-500">✕</button>
           </div>
         )}
 
@@ -334,7 +334,7 @@ export default function App() {
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
             onDrop={onDrop}
-            className={`rounded-xl transition-all ${dragging ? 'ring-2 ring-accent/40 bg-accent/5' : ''}`}
+            className={`rounded-xl transition-all ${dragging ? 'ring-2 ring-brand/40 bg-brand-light/50' : ''}`}
           >
             {records.length > 0 ? (
               <LifetimeDashboard
@@ -374,10 +374,10 @@ export default function App() {
                   <div className="flex gap-1">
                     <button
                       onClick={() => setActiveStake(null)}
-                      className={`px-2.5 py-1 rounded border text-xs transition-colors ${
+                      className={`px-2.5 py-1 rounded-full border text-xs transition-colors ${
                         activeStake === null
-                          ? 'border-accent text-accent bg-accent/10'
-                          : 'border-gray-700 text-gray-500 hover:border-gray-500'
+                          ? 'border-brand text-brand bg-brand-light'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-400'
                       }`}
                     >
                       All
@@ -388,10 +388,10 @@ export default function App() {
                         <button
                           key={key}
                           onClick={() => setActiveStake(key)}
-                          className={`px-2.5 py-1 rounded border text-xs transition-colors ${
+                          className={`px-2.5 py-1 rounded-full border text-xs transition-colors ${
                             activeStake === key
-                              ? 'border-accent text-accent bg-accent/10'
-                              : 'border-gray-700 text-gray-500 hover:border-gray-500'
+                              ? 'border-brand text-brand bg-brand-light'
+                              : 'border-gray-200 text-gray-500 hover:border-gray-400'
                           }`}
                         >
                           ${sb}/${bb}
@@ -401,12 +401,12 @@ export default function App() {
                   </div>
                 )}
 
-                <span className="text-gray-700 ml-2">
+                <span className="text-gray-300 ml-2">
                   {rec.fileNames.length} file{rec.fileNames.length !== 1 ? 's' : ''}
                 </span>
                 <button
                   onClick={() => setView('library')}
-                  className="text-gray-600 hover:text-gray-400 transition-colors ml-1"
+                  className="text-gray-400 hover:text-gray-700 transition-colors ml-1"
                 >
                   ✕
                 </button>

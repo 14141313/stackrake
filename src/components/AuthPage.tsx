@@ -33,16 +33,16 @@ export function AuthPage() {
 
   if (confirmation) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-bg text-gray-100">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-900">
         <div className="w-full max-w-sm text-center">
-          <h1 className="text-2xl font-mono text-white mb-2">Check your email</h1>
+          <h1 className="text-2xl font-mono text-gray-900 mb-2">Check your email</h1>
           <p className="text-gray-500 text-sm mb-6">
-            We sent a confirmation link to <span className="text-gray-300">{email}</span>.
+            We sent a confirmation link to <span className="text-gray-700">{email}</span>.
             Click it to activate your account, then sign in.
           </p>
           <button
             onClick={() => { setConfirmation(false); setMode('signin') }}
-            className="text-accent text-sm hover:underline"
+            className="text-brand text-sm hover:underline"
           >
             Back to sign in
           </button>
@@ -52,21 +52,21 @@ export function AuthPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-bg text-gray-100">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-900">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-mono text-white mb-1">Stackrake</h1>
+          <h1 className="text-2xl font-mono text-gray-900 mb-1">Stackrake</h1>
           <p className="text-gray-500 text-sm">PLO analytics · GGPoker & Natural8 · Client-side</p>
         </div>
 
         {/* Mode toggle */}
-        <div className="flex rounded-lg border border-gray-800 mb-6 overflow-hidden">
+        <div className="flex rounded-lg border border-gray-200 mb-6 overflow-hidden">
           {(['signin', 'signup'] as const).map(m => (
             <button
               key={m}
               onClick={() => { setMode(m); setError(null) }}
               className={`flex-1 py-2 text-xs font-mono transition-colors ${
-                mode === m ? 'bg-[#1a1a1a] text-white' : 'text-gray-600 hover:text-gray-400'
+                mode === m ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               {m === 'signin' ? 'Sign In' : 'Create Account'}
@@ -83,7 +83,7 @@ export function AuthPage() {
               autoComplete="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-gray-700 rounded px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-accent/60 placeholder-gray-700"
+              className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono text-gray-900 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/20 placeholder-gray-400"
               placeholder="you@example.com"
             />
           </div>
@@ -97,13 +97,13 @@ export function AuthPage() {
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-gray-700 rounded px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-accent/60 placeholder-gray-700"
+              className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono text-gray-900 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/20 placeholder-gray-400"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <p className="text-xs text-red-400 bg-red-950/30 border border-red-900/40 rounded px-3 py-2">
+            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
               {error}
             </p>
           )}
@@ -111,13 +111,13 @@ export function AuthPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded bg-accent text-black text-sm font-mono font-semibold hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-2.5 rounded-lg bg-brand text-white text-sm font-mono font-semibold hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? '…' : mode === 'signin' ? 'Sign In' : 'Create Account'}
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-700 mt-6">
+        <p className="text-center text-xs text-gray-400 mt-6">
           Your hand histories never leave your browser — only aggregated session data is stored.
         </p>
       </div>

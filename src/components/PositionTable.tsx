@@ -7,9 +7,9 @@ interface Props {
 const POSITIONS: Position[] = ['BTN', 'CO', 'MP', 'UTG', 'SB', 'BB']
 
 function netColor(n: number): string {
-  if (n > 0) return 'text-pos'
-  if (n < 0) return 'text-neg'
-  return 'text-gray-400'
+  if (n > 0) return 'text-positive'
+  if (n < 0) return 'text-negative'
+  return 'text-gray-500'
 }
 
 function sign(n: number, decimals = 2): string {
@@ -35,12 +35,12 @@ export function PositionTable({ result }: Props) {
   }
 
   return (
-    <div className="bg-[#1a1a1a] rounded-lg p-6 mb-6">
+    <div className="bg-white rounded-xl p-6 mb-6 border border-gray-100 shadow-sm">
       <h2 className="text-xs text-gray-500 uppercase tracking-wider mb-4">Win / Loss by Position</h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm font-mono">
           <thead>
-            <tr className="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-800">
+            <tr className="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-100">
               <th className="text-left pb-2 pr-4">Pos</th>
               <th className="text-right pb-2 pr-4">Hands</th>
               <th className="text-right pb-2 pr-4">VPIP</th>
@@ -55,19 +55,19 @@ export function PositionTable({ result }: Props) {
               if (s.hands === 0) return null
               const vpipPct = s.hands > 0 ? Math.round((s.vpipHands / s.hands) * 100) : 0
               return (
-                <tr key={pos} className="border-b border-gray-800/50 hover:bg-white/[0.02] transition-colors">
-                  <td className="py-2 pr-4 text-gray-300 font-semibold">{pos}</td>
-                  <td className="py-2 pr-4 text-right text-gray-400">{s.hands}</td>
-                  <td className="py-2 pr-4 text-right text-gray-400">{vpipPct}%</td>
+                <tr key={pos} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                  <td className="py-2 pr-4 text-gray-700 font-semibold">{pos}</td>
+                  <td className="py-2 pr-4 text-right text-gray-600">{s.hands}</td>
+                  <td className="py-2 pr-4 text-right text-gray-600">{vpipPct}%</td>
                   <td className={`py-2 pr-4 text-right ${netColor(s.net)}`}>{sign(s.net)}</td>
                   <td className={`py-2 pr-4 text-right ${netColor(s.net)}`}>{bbPer100(s.net, primaryBB, s.hands)}</td>
-                  <td className="py-2 text-right text-gray-500">${s.rake.toFixed(2)}</td>
+                  <td className="py-2 text-right text-brand">${s.rake.toFixed(2)}</td>
                 </tr>
               )
             })}
           </tbody>
           <tfoot>
-            <tr className="text-gray-400 border-t border-gray-700">
+            <tr className="text-gray-600 border-t border-gray-200">
               <td className="pt-2 pr-4 text-gray-500 uppercase text-xs">Total</td>
               <td className="pt-2 pr-4 text-right">{total.hands}</td>
               <td className="pt-2 pr-4 text-right text-gray-500">
@@ -79,7 +79,7 @@ export function PositionTable({ result }: Props) {
               <td className={`pt-2 pr-4 text-right font-semibold ${netColor(total.net)}`}>
                 {bbPer100(total.net, primaryBB, total.hands)}
               </td>
-              <td className="pt-2 text-right text-gray-500">${result.totalHeroRake.toFixed(2)}</td>
+              <td className="pt-2 text-right text-brand">${result.totalHeroRake.toFixed(2)}</td>
             </tr>
           </tfoot>
         </table>

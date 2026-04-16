@@ -52,16 +52,16 @@ export function GemCheckInModal({ onComplete, onDismiss }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
-      <div className="w-full max-w-md bg-[#1a1a1a] border border-gray-800 rounded-xl p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl p-6 shadow-xl">
 
         {/* Header */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-white font-mono text-base">Monthly GEM Check-in</h2>
+            <h2 className="text-gray-900 font-mono text-base">Monthly GEM Check-in</h2>
             <button
               onClick={onDismiss}
-              className="text-gray-600 hover:text-gray-400 transition-colors text-lg leading-none"
+              className="text-gray-400 hover:text-gray-600 transition-colors text-lg leading-none"
             >
               ✕
             </button>
@@ -75,8 +75,8 @@ export function GemCheckInModal({ onComplete, onDismiss }: Props) {
 
           {/* Current balance */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5">
-              Current GEM balance <span className="text-gray-600">(as of today)</span>
+            <label className="block text-xs text-gray-600 mb-1.5">
+              Current GEM balance <span className="text-gray-400">(as of today)</span>
             </label>
             <input
               type="number"
@@ -85,14 +85,14 @@ export function GemCheckInModal({ onComplete, onDismiss }: Props) {
               placeholder="e.g. 12500"
               value={balance}
               onChange={e => setBalance(e.target.value)}
-              className="w-full bg-[#0f0f0f] border border-gray-700 rounded px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-accent/60 placeholder-gray-700"
+              className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono text-gray-900 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/20 placeholder-gray-400"
             />
           </div>
 
           {/* Redeemed last month */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5">
-              GEMs redeemed in {monthLabel(prevMonth)} <span className="text-gray-600">(enter 0 if none)</span>
+            <label className="block text-xs text-gray-600 mb-1.5">
+              GEMs redeemed in {monthLabel(prevMonth)} <span className="text-gray-400">(enter 0 if none)</span>
             </label>
             <input
               type="number"
@@ -100,12 +100,12 @@ export function GemCheckInModal({ onComplete, onDismiss }: Props) {
               placeholder="e.g. 5000"
               value={redeemed}
               onChange={e => setRedeemed(e.target.value)}
-              className="w-full bg-[#0f0f0f] border border-gray-700 rounded px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-accent/60 placeholder-gray-700"
+              className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono text-gray-900 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/20 placeholder-gray-400"
             />
           </div>
 
           {error && (
-            <p className="text-xs text-red-400 bg-red-950/30 border border-red-900/40 rounded px-3 py-2">
+            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
               {error}
             </p>
           )}
@@ -114,21 +114,21 @@ export function GemCheckInModal({ onComplete, onDismiss }: Props) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 rounded bg-accent text-black text-sm font-mono font-semibold hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 py-2.5 rounded-lg bg-brand text-white text-sm font-mono font-semibold hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? 'Saving…' : 'Save Check-in'}
             </button>
             <button
               type="button"
               onClick={onDismiss}
-              className="px-4 py-2.5 rounded border border-gray-700 text-gray-400 text-sm font-mono hover:border-gray-500 transition-colors"
+              className="px-4 py-2.5 rounded-lg border border-gray-200 text-gray-500 text-sm font-mono hover:border-gray-400 transition-colors"
             >
               Later
             </button>
           </div>
         </form>
 
-        <p className="mt-4 text-xs text-gray-700 text-center">
+        <p className="mt-4 text-xs text-gray-400 text-center">
           GEM earnings = current balance − last month's balance + redeemed
         </p>
       </div>

@@ -69,21 +69,21 @@ export function UploadZone({ onResult }: Props) {
   if (state === 'idle') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
-        <h1 className="text-2xl font-mono text-white mb-1">Stackrake</h1>
+        <h1 className="text-2xl font-mono text-gray-900 mb-1">Stackrake</h1>
         <p className="text-gray-500 text-sm mb-10">PLO analytics · GGPoker & Natural8 · Client-side</p>
 
         <div
-          className={`w-full max-w-lg border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
-            dragging ? 'border-accent bg-accent/5' : 'border-gray-700 hover:border-gray-500'
+          className={`w-full max-w-lg border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors ${
+            dragging ? 'border-brand bg-brand-light/30' : 'border-gray-200 hover:border-brand hover:bg-brand-light/20'
           }`}
           onDragOver={e => { e.preventDefault(); setDragging(true) }}
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
           onClick={() => inputRef.current?.click()}
         >
-          <div className="text-4xl mb-4 text-gray-600">⬆</div>
-          <p className="text-gray-300 mb-1">Drop hand history files here</p>
-          <p className="text-gray-600 text-sm">or click to browse · .txt files · drop a whole session folder</p>
+          <div className="text-4xl mb-4 text-gray-400">⬆</div>
+          <p className="text-gray-600 mb-1">Drop hand history files here</p>
+          <p className="text-gray-400 text-sm">or click to browse · .txt files · drop a whole session folder</p>
           <input
             ref={inputRef}
             type="file"
@@ -109,13 +109,13 @@ export function UploadZone({ onResult }: Props) {
   return (
     <div className="flex items-center justify-between mb-6 text-xs text-gray-500 font-mono">
       <div className="flex gap-4 flex-wrap">
-        <span className="text-gray-400">{fileNames.length} file{fileNames.length !== 1 ? 's' : ''}</span>
+        <span className="text-gray-600">{fileNames.length} file{fileNames.length !== 1 ? 's' : ''}</span>
         <span>{handCount.toLocaleString()} hands parsed</span>
         {skipped > 0 && (
           <span className="text-yellow-600">{skipped} skipped</span>
         )}
       </div>
-      <button onClick={reset} className="text-gray-600 hover:text-gray-400 transition-colors">
+      <button onClick={reset} className="text-gray-400 hover:text-gray-600 transition-colors">
         ✕ clear
       </button>
     </div>

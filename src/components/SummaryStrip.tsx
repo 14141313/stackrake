@@ -16,9 +16,9 @@ function Card({
   valueColor?: string
 }) {
   return (
-    <div className="bg-[#1a1a1a] rounded p-4 flex flex-col gap-1 min-w-0">
+    <div className="bg-white rounded-xl p-4 flex flex-col gap-1 min-w-0 border border-gray-100 shadow-sm">
       <span className="text-xs text-gray-500 uppercase tracking-wider">{label}</span>
-      <span className={`font-mono text-xl ${valueColor ?? 'text-white'}`}>{value}</span>
+      <span className={`font-mono text-xl ${valueColor ?? 'text-gray-900'}`}>{value}</span>
       {sub && <span className="text-xs text-gray-500 font-mono">{sub}</span>}
     </div>
   )
@@ -59,9 +59,9 @@ export function SummaryStrip({ result }: Props) {
     tableIds,
   } = result
 
-  const netColor = netResult > 0 ? 'text-pos' : netResult < 0 ? 'text-neg' : 'text-white'
-  const bbColor = bbPer100 > 0 ? 'text-pos' : bbPer100 < 0 ? 'text-neg' : 'text-white'
-  const hrColor = dollarsPerHour > 0 ? 'text-pos' : dollarsPerHour < 0 ? 'text-neg' : 'text-white'
+  const netColor = netResult > 0 ? 'text-positive' : netResult < 0 ? 'text-negative' : 'text-gray-900'
+  const bbColor = bbPer100 > 0 ? 'text-positive' : bbPer100 < 0 ? 'text-negative' : 'text-gray-900'
+  const hrColor = dollarsPerHour > 0 ? 'text-positive' : dollarsPerHour < 0 ? 'text-negative' : 'text-gray-900'
 
   const stakeLabel = stakes
     .map(s => `$${s.sb}/$${s.bb}`)
@@ -97,16 +97,19 @@ export function SummaryStrip({ result }: Props) {
             ? `total deductions $${result.totalHeroDeductions.toFixed(2)} · VPIP ${vpipPct}%`
             : `VPIP ${vpipPct}% · ${vpipHands}/${handsPlayed} hands`
         }
+        valueColor="text-brand"
       />
       <Card
         label="Hands"
         value={handsPlayed.toLocaleString()}
         sub={`${tableIds.length} table${tableIds.length !== 1 ? 's' : ''}`}
+        valueColor="text-brand"
       />
       <Card
         label="Session"
         value={fmtDuration(durationMinutes)}
         sub={`${fmtDate(dateRange.from)} · ${fmtTime(dateRange.from)} – ${fmtTime(dateRange.to)}`}
+        valueColor="text-brand"
       />
     </div>
   )
