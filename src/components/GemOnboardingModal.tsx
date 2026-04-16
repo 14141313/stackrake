@@ -4,10 +4,9 @@ import type { GemSnapshot } from '../lib/types'
 
 interface Props {
   onComplete: (snapshot: GemSnapshot) => void
-  onDismiss: () => void
 }
 
-export function GemOnboardingModal({ onComplete, onDismiss }: Props) {
+export function GemOnboardingModal({ onComplete }: Props) {
   const [step, setStep] = useState<'explain' | 'form'>('explain')
   const [balance, setBalance] = useState('')
   const [redeemed, setRedeemed] = useState('')
@@ -64,20 +63,12 @@ export function GemOnboardingModal({ onComplete, onDismiss }: Props) {
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setStep('form')}
-                className="flex-1 py-2.5 rounded bg-accent text-black text-sm font-mono font-semibold hover:bg-accent/90 transition-colors"
-              >
-                Set my baseline →
-              </button>
-              <button
-                onClick={onDismiss}
-                className="px-4 py-2.5 rounded border border-gray-700 text-gray-400 text-sm font-mono hover:border-gray-500 transition-colors"
-              >
-                Later
-              </button>
-            </div>
+            <button
+              onClick={() => setStep('form')}
+              className="w-full py-2.5 rounded bg-accent text-black text-sm font-mono font-semibold hover:bg-accent/90 transition-colors"
+            >
+              Set my baseline →
+            </button>
           </>
         ) : (
           <>
@@ -132,22 +123,13 @@ export function GemOnboardingModal({ onComplete, onDismiss }: Props) {
                 </p>
               )}
 
-              <div className="flex gap-3 pt-1">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 py-2.5 rounded bg-accent text-black text-sm font-mono font-semibold hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {loading ? 'Saving…' : 'Save baseline'}
-                </button>
-                <button
-                  type="button"
-                  onClick={onDismiss}
-                  className="px-4 py-2.5 rounded border border-gray-700 text-gray-400 text-sm font-mono hover:border-gray-500 transition-colors"
-                >
-                  Later
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2.5 rounded bg-accent text-black text-sm font-mono font-semibold hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? 'Saving…' : 'Save baseline'}
+              </button>
             </form>
           </>
         )}

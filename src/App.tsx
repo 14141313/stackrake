@@ -212,7 +212,6 @@ export default function App() {
             setShowGemOnboarding(false)
             setShowGemCheckIn(false) // don't double-prompt this month
           }}
-          onDismiss={() => setShowGemOnboarding(false)}
         />
       )}
       {showGemCheckIn && !showGemOnboarding && (
