@@ -58,6 +58,7 @@ export function analyseSession(rawHands: SessionHand[]): SessionResult {
   let vpipHands = 0
   const deductionBreakdown = { rake: 0, jackpot: 0, bingo: 0, fortune: 0, tax: 0 }
   const unreconciledHands: Array<{ handId: string; diff: number }> = []
+  const rakeAnomalyHands: Array<{ handId: string; reported: number; expected: number }> = []
 
   const posAccumulators: Record<Position, PositionStats> = Object.fromEntries(
     ALL_POSITIONS.map(p => [p, { net: 0, hands: 0, vpipHands: 0, rake: 0 }])
@@ -81,6 +82,9 @@ export function analyseSession(rawHands: SessionHand[]): SessionResult {
     deductionBreakdown.tax     += h.tax
     if (Math.abs(h.reconciledDiff) > 0.02) {
       unreconciledHands.push({ handId: h.handId, diff: h.reconciledDiff })
+    }
+    if (Math.abs(h.rakeVariance) > 0.02) {
+      rakeAnomalyHands.push({ handId: h.handId, reported: h.rake, expected: h.expectedRake })
     }
 
     // Compute EV for all-in hands where we have villain cards
@@ -155,6 +159,7 @@ export function analyseSession(rawHands: SessionHand[]): SessionResult {
     totalHeroDeductions,
     deductionBreakdown,
     unreconciledHands,
+    rakeAnomalyHands,
     handsPlayed,
     vpipHands,
     bbWon,
@@ -182,6 +187,7 @@ function emptyResult(): SessionResult {
     totalHeroDeductions: 0,
     deductionBreakdown: { rake: 0, jackpot: 0, bingo: 0, fortune: 0, tax: 0 },
     unreconciledHands: [],
+    rakeAnomalyHands: [],
     handsPlayed: 0,
     vpipHands: 0,
     bbWon: 0,

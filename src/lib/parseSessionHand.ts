@@ -1,4 +1,5 @@
 import type { SessionHand, Position, Stakes } from './types'
+import { computeExpectedRake } from './rakeReference'
 
 // ── Regex patterns ────────────────────────────────────────────────────────────
 
@@ -140,6 +141,7 @@ export function parseSessionHand(hand: string): SessionHand | null {
   const heroCommitted: Record<Street, number> = { preflop: 0, flop: 0, turn: 0, river: 0 }
   let heroVPIP = false
   let isAllIn = false
+  let preflopRaiseCount = 0
   const board: string[] = []
   const boardAtAllIn: string[] = []
   const villainCards: string[][] = []
@@ -192,6 +194,11 @@ export function parseSessionHand(hand: string): SessionHand | null {
     if (colonIdx === -1) continue
     const player = line.slice(0, colonIdx).trim()
     const rest = line.slice(colonIdx + 2)
+
+    // Count ALL player preflop raises (for no-flop-no-drop rule)
+    if (currentStreet === 'preflop' && rest.startsWith('raises')) {
+      preflopRaiseCount++
+    }
 
     if (player !== 'Hero') continue
 
@@ -254,6 +261,10 @@ export function parseSessionHand(hand: string): SessionHand | null {
   }
 
   const totalDeductions = rake + jackpot + bingo + fortune + tax
+  const hadFlop = board.length >= 3
+  const expectedRake = computeExpectedRake(totalPot, stakes.bb, seats.length, hadFlop, preflopRaiseCount)
+  const rakeVariance = Math.round((rake - expectedRake) * 100) / 100
+
   const heroNet = heroCollected - heroContributed
 
   // Proportional share — rake only for rakeback, all deductions for true cost
@@ -295,5 +306,9 @@ export function parseSessionHand(hand: string): SessionHand | null {
     boardAtAllIn,
     villainCards,
     totalPot,
+    hadFlop,
+    preflopRaiseCount,
+    expectedRake,
+    rakeVariance,
   }
 }

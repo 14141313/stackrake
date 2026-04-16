@@ -112,6 +112,10 @@ export function rawToHand(r: RawHand): SessionHand {
     totalDeductions:    r.totalDeductions    ?? r.rake ?? 0,
     heroTotalDeductions:r.heroTotalDeductions ?? r.heroRake ?? 0,
     reconciledDiff:     r.reconciledDiff     ?? 0,
+    hadFlop:            r.hadFlop            ?? false,
+    preflopRaiseCount:  r.preflopRaiseCount  ?? 0,
+    expectedRake:       r.expectedRake       ?? 0,
+    rakeVariance:       r.rakeVariance       ?? 0,
   }
 }
 

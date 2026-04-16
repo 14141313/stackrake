@@ -47,6 +47,14 @@ export interface SessionHand {
   villainCards: string[][]
   /** total pot amount (before rake) */
   totalPot: number
+  /** true if a flop was dealt in this hand */
+  hadFlop: boolean
+  /** number of raises made preflop (across all players) */
+  preflopRaiseCount: number
+  /** rake expected per the GGPoker schedule (may differ from reported rake) */
+  expectedRake: number
+  /** reported rake − expected rake (positive = overcharged, negative = undercharged) */
+  rakeVariance: number
 }
 
 // ── GEM snapshots ─────────────────────────────────────────────────────────────
@@ -106,6 +114,8 @@ export interface SessionResult {
   deductionBreakdown: { rake: number; jackpot: number; bingo: number; fortune: number; tax: number }
   /** hands where totalPot - totalDeductions - totalCollected ≠ 0 (> $0.02 diff) */
   unreconciledHands: Array<{ handId: string; diff: number }>
+  /** hands where reported rake differs from schedule by > $0.02 */
+  rakeAnomalyHands: Array<{ handId: string; reported: number; expected: number }>
   handsPlayed: number
   vpipHands: number
   /** net / bigBlind */

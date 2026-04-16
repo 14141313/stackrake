@@ -181,25 +181,77 @@ export function RakebackPanel({ result, snapshots }: Props) {
       {/* Pot deduction breakdown */}
       {(() => {
         const b = result.deductionBreakdown
-        const totalDed = round2(b.rake + b.jackpot + b.bingo + b.fortune + b.tax)
+        const trueCost = round2(b.rake + b.tax)
+        const redistributed = round2(b.jackpot + b.bingo + b.fortune)
+        const totalDed = round2(trueCost + redistributed)
         const hasExtra = b.jackpot > 0 || b.bingo > 0 || b.fortune > 0 || b.tax > 0
-        if (!hasExtra && result.unreconciledHands.length === 0) return null
+        const hasAnomalies = result.rakeAnomalyHands.length > 0
+        if (!hasExtra && result.unreconciledHands.length === 0 && !hasAnomalies) return null
         return (
-          <div className="mt-5 border-t border-gray-800 pt-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Pot Deduction Breakdown</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs font-mono mb-3">
-              <DeductRow label="Rake" value={b.rake} note="TP calculated on this" />
-              {b.jackpot > 0 && <DeductRow label="Jackpot" value={b.jackpot} />}
-              {b.bingo   > 0 && <DeductRow label="Bingo"   value={b.bingo} />}
-              {b.fortune > 0 && <DeductRow label="Fortune" value={b.fortune} />}
-              {b.tax     > 0 && <DeductRow label="Tax"     value={b.tax} />}
-              {hasExtra && (
+          <div className="mt-5 border-t border-gray-800 pt-4 space-y-4">
+            <p className="text-xs text-gray-500 uppercase tracking-wider">Pot Deduction Breakdown</p>
+
+            {/* True cost section */}
+            <div>
+              <p className="text-xs text-gray-600 mb-2">True cost of playing</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs font-mono">
+                <DeductRow label="Rake" value={b.rake} note="TP calculated on this" />
+                {b.tax > 0 && <DeductRow label="Tax" value={b.tax} highlight />}
                 <div className="col-span-full border-t border-gray-800 pt-2 mt-1 flex justify-between">
-                  <span className="text-gray-400 font-semibold">Total deducted from pots</span>
-                  <span className="text-white font-semibold">${totalDed.toFixed(2)}</span>
+                  <span className="text-gray-400 font-semibold">Total permanent cost</span>
+                  <span className="text-white font-semibold">${trueCost.toFixed(2)}</span>
                 </div>
-              )}
+              </div>
             </div>
+
+            {/* Redistributed section */}
+            {redistributed > 0 && (
+              <div>
+                <p className="text-xs text-gray-600 mb-1">
+                  Redistributed to player pool
+                  <span className="text-gray-700 ml-1">— EV-neutral over large samples</span>
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs font-mono">
+                  {b.jackpot > 0 && <DeductRow label="Jackpot" value={b.jackpot} note="returned to bad-beat winners" />}
+                  {b.bingo   > 0 && <DeductRow label="Bingo"   value={b.bingo}   note="returned to bingo prize pool" />}
+                  {b.fortune > 0 && <DeductRow label="Fortune" value={b.fortune} note="returned to fortune prize pool" />}
+                  <div className="col-span-full border-t border-gray-800 pt-2 mt-1 flex justify-between">
+                    <span className="text-gray-400 font-semibold">Total redistributed</span>
+                    <span className="text-gray-300 font-semibold">${redistributed.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Grand total */}
+            {hasExtra && (
+              <div className="flex justify-between items-center text-xs font-mono border-t border-gray-800 pt-2">
+                <span className="text-gray-500">Total deducted from pots</span>
+                <span className="text-gray-400">${totalDed.toFixed(2)}</span>
+              </div>
+            )}
+
+            {/* Rake anomaly banner */}
+            {hasAnomalies && (
+              <div className="flex items-start gap-2 bg-orange-950/30 border border-orange-900/40 rounded px-3 py-2">
+                <span className="text-orange-400 text-sm mt-0.5">⚠</span>
+                <div>
+                  <p className="text-xs text-orange-300 font-mono font-semibold">
+                    {result.rakeAnomalyHands.length} rake anomal{result.rakeAnomalyHands.length !== 1 ? 'ies' : 'y'} detected
+                  </p>
+                  <p className="text-xs text-orange-700 mt-0.5">
+                    Reported rake differs from the GGPoker schedule by &gt;$0.02.
+                    Max variance: ${Math.max(...result.rakeAnomalyHands.map(h => Math.abs(h.reported - h.expected))).toFixed(2)}
+                  </p>
+                  <p className="text-xs text-orange-800 mt-1 font-mono">
+                    IDs: {result.rakeAnomalyHands.slice(0, 5).map(h => h.handId).join(', ')}
+                    {result.rakeAnomalyHands.length > 5 ? ` +${result.rakeAnomalyHands.length - 5} more` : ''}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Reconciliation warning */}
             {result.unreconciledHands.length > 0 && (
               <div className="flex items-start gap-2 bg-yellow-950/30 border border-yellow-900/40 rounded px-3 py-2">
                 <span className="text-yellow-500 text-sm mt-0.5">⚠</span>
@@ -223,17 +275,21 @@ export function RakebackPanel({ result, snapshots }: Props) {
       })()}
 
       <p className="mt-4 text-xs text-gray-600 italic">
-        Rakeback figures are estimates. GEM bulk redemption may offer better value than the standard rate — check Ocean Rewards for current offers.
+        Rakeback estimates are based on your tier rate applied to raw rake from hand histories.
+        Actual TP earned may vary due to GGPoker's Player Value Index (PVI) adjustment — the formula is not public.
+        GEM bulk redemption may offer better value than the standard rate — check Ocean Rewards for current offers.
       </p>
     </div>
   )
 }
 
-function DeductRow({ label, value, note }: { label: string; value: number; note?: string }) {
+function DeductRow({ label, value, note, highlight }: { label: string; value: number; note?: string; highlight?: boolean }) {
   return (
     <div className="flex justify-between items-baseline">
-      <span className="text-gray-600">{label}{note ? <span className="text-gray-700 ml-1">({note})</span> : ''}</span>
-      <span className="text-gray-400">${value.toFixed(2)}</span>
+      <span className={highlight ? 'text-orange-600' : 'text-gray-600'}>
+        {label}{note ? <span className="text-gray-700 ml-1">({note})</span> : ''}
+      </span>
+      <span className={highlight ? 'text-orange-400' : 'text-gray-400'}>${value.toFixed(2)}</span>
     </div>
   )
 }
