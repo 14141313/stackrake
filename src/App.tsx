@@ -11,6 +11,7 @@ import { PositionTable } from './components/PositionTable'
 import { RakebackPanel } from './components/RakebackPanel'
 import { AuthPage } from './components/AuthPage'
 import { GemCheckInModal } from './components/GemCheckInModal'
+import { GemOnboardingModal } from './components/GemOnboardingModal'
 import { supabase } from './lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
@@ -28,6 +29,7 @@ export default function App() {
   const [cloudError, setCloudError] = useState<string | null>(null)
   const [gemSnapshots, setGemSnapshots] = useState<GemSnapshot[]>([])
   const [showGemCheckIn, setShowGemCheckIn] = useState(false)
+  const [showGemOnboarding, setShowGemOnboarding] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   // ── Auth state ──────────────────────────────────────────────────────────────
@@ -107,6 +109,7 @@ export default function App() {
     // Check for duplicate session and reuse its ID if found
     const newHandIds = new Set(valid.map(h => h.handId))
     const duplicateId = findDuplicateRecord(newHandIds)
+    const isFirstUpload = records.length === 0
     let record = createRecord(valid, names)
     if (duplicateId) record = { ...record, id: duplicateId }
 
@@ -117,6 +120,10 @@ export default function App() {
       setActiveRecordId(record.id)
       setActiveStake(null)
       setView('session')
+      // Show GEM onboarding after first-ever upload if no snapshots recorded yet
+      if (isFirstUpload && gemSnapshots.length === 0) {
+        setShowGemOnboarding(true)
+      }
     } catch (err: unknown) {
       setCloudError(err instanceof Error ? err.message : 'Failed to save session')
     }
@@ -195,7 +202,20 @@ export default function App() {
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-bg text-gray-100">
-      {showGemCheckIn && (
+      {showGemOnboarding && (
+        <GemOnboardingModal
+          onComplete={snapshot => {
+            setGemSnapshots(prev => {
+              const filtered = prev.filter(s => s.month !== snapshot.month)
+              return [snapshot, ...filtered]
+            })
+            setShowGemOnboarding(false)
+            setShowGemCheckIn(false) // don't double-prompt this month
+          }}
+          onDismiss={() => setShowGemOnboarding(false)}
+        />
+      )}
+      {showGemCheckIn && !showGemOnboarding && (
         <GemCheckInModal
           onComplete={snapshot => {
             setGemSnapshots(prev => {
