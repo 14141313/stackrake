@@ -55,16 +55,21 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
     return allHands.length > 0 ? analyseSession(allHands) : null
   }, [records])
 
-  // Sum of per-session play time: first hand to last hand within each record.
-  // Records are distinct upload sessions so each spans one continuous play period.
+  // Sum actual play time by walking sorted timestamps and only counting gaps
+  // under 2 hours. Gaps >= 2h are treated as breaks between sessions and skipped.
+  // This correctly handles multiple playing sessions stored in one record.
   const totalPlayMinutes = useMemo(() => {
-    return records.reduce((sum, rec) => {
-      if (rec.hands.length < 2) return sum
-      const timestamps = rec.hands.map(h => h.timestamp)
-      const first = Math.min(...timestamps)
-      const last = Math.max(...timestamps)
-      return sum + (last - first) / 60_000
-    }, 0)
+    const allTimestamps = records
+      .flatMap(r => r.hands.map(h => h.timestamp))
+      .sort((a, b) => a - b)
+    if (allTimestamps.length < 2) return 0
+    const BREAK_MS = 2 * 60 * 60_000 // 2 hours
+    let total = 0
+    for (let i = 1; i < allTimestamps.length; i++) {
+      const gap = allTimestamps[i] - allTimestamps[i - 1]
+      if (gap < BREAK_MS) total += gap
+    }
+    return total / 60_000
   }, [records])
 
   // Total GEM cashback from snapshots
