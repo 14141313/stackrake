@@ -30,6 +30,7 @@ export default function App() {
   const [activeStake, setActiveStake] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [dragging, setDragging] = useState(false)
+  const [dataLoading, setDataLoading] = useState(false)
   const [cloudError, setCloudError] = useState<string | null>(null)
   const [gemSnapshots, setGemSnapshots] = useState<GemSnapshot[]>([])
   const [showGemCheckIn, setShowGemCheckIn] = useState(false)
@@ -66,6 +67,7 @@ export default function App() {
     if (savedTier) setTier(savedTier)
 
     setCloudError(null)
+    setDataLoading(true)
     Promise.all([loadCloudRecords(), loadGemSnapshots()])
       .then(([recs, snaps]) => {
         setRecords(recs)
@@ -73,6 +75,7 @@ export default function App() {
         setShowGemCheckIn(shouldShowGemCheckIn(snaps))
       })
       .catch(err => setCloudError(err.message ?? 'Failed to load data'))
+      .finally(() => setDataLoading(false))
   }, [user])
 
   // ── Session overlap detection ───────────────────────────────────────────────
@@ -337,7 +340,11 @@ export default function App() {
             onDrop={onDrop}
             className={`rounded-xl transition-all ${dragging ? 'ring-2 ring-brand/40 bg-brand-light/50' : ''}`}
           >
-            {records.length > 0 ? (
+            {dataLoading ? (
+              <div className="flex items-center justify-center min-h-[55vh]">
+                <p className="text-gray-400 text-sm animate-pulse">Loading…</p>
+              </div>
+            ) : records.length > 0 ? (
               <LifetimeDashboard
                 records={records}
                 snapshots={gemSnapshots}
@@ -352,6 +359,7 @@ export default function App() {
                 onUpload={() => inputRef.current?.click()}
               />
             )}
+
           </div>
         )}
 
