@@ -288,7 +288,7 @@ export function parseSessionHand(hand: string): SessionHand | null {
 
   const totalDeductions = rake + jackpot + bingo + fortune + tax
   const hadFlop = board.length >= 3
-  const expectedRake = computeExpectedRake(totalPot, stakes.bb, seats.length, hadFlop, preflopRaiseCount)
+  const expectedRake = computeExpectedRake(totalPot, stakes.bb, seats.length, hadFlop, preflopRaiseCount, jackpot + bingo + fortune)
   const rakeVariance = Math.round((rake - expectedRake) * 100) / 100
 
   const heroNet = heroCollected - heroContributed

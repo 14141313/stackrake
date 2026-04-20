@@ -60,18 +60,21 @@ export function getRakeCap(bb: number, numPlayers: number): number {
  * Returns true if this hand should have rake taken from it.
  *
  * GGNetwork no-flop-no-drop rule:
- *   – Hands that end preflop (no flop seen) are NOT raked …
- *   – … UNLESS there was a 3-bet or more preflop (2+ raises).
- *     On GGNetwork, preflop aggression (3-bet/4-bet pots) are raked
- *     even if all players fold before the flop.
+ *   – Pure walks (BB wins uncontested, no raise) are NOT raked.
+ *   – Any raise preflop (open raise, 3-bet, etc.) triggers rake
+ *     even if no flop is seen.
  */
 export function shouldHandBeRaked(hadFlop: boolean, preflopRaiseCount: number): boolean {
-  return hadFlop || preflopRaiseCount >= 2
+  return hadFlop || preflopRaiseCount >= 1
 }
 
 /**
  * Compute the rake that should have been charged for a hand per the schedule.
  * Returns 0 for hands that pass the no-flop-no-drop check.
+ *
+ * GGPoker calculates rake on (totalPot − redistributed deductions) and floors
+ * to the nearest cent. Redistributed deductions = jackpot + bingo + fortune
+ * (these are returned to the player pool and are not part of the rake base).
  */
 export function computeExpectedRake(
   totalPot: number,
@@ -79,10 +82,12 @@ export function computeExpectedRake(
   numPlayers: number,
   hadFlop: boolean,
   preflopRaiseCount: number,
+  redistributed = 0,
 ): number {
   if (!shouldHandBeRaked(hadFlop, preflopRaiseCount)) return 0
+  const rakeBase = Math.max(0, totalPot - redistributed)
   const cap = getRakeCap(bb, numPlayers)
-  return round2(Math.min(totalPot * RAKE_PCT, cap))
+  return floorCents(Math.min(rakeBase * RAKE_PCT, cap))
 }
 
 // ── Display table for UI ──────────────────────────────────────────────────────
@@ -109,6 +114,11 @@ export const RAKE_TABLE_DISPLAY: RakeTableRow[] = [
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Floor to nearest cent — GGPoker truncates rather than rounds rake. */
+function floorCents(n: number): number {
+  return Math.floor(n * 100) / 100
+}
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100

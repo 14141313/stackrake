@@ -85,7 +85,10 @@ export function analyseSession(rawHands: SessionHand[]): SessionResult {
     if (Math.abs(h.reconciledDiff) > 0.02) {
       unreconciledHands.push({ handId: h.handId, diff: h.reconciledDiff })
     }
-    if (Math.abs(h.rakeVariance) > 0.02) {
+    // Only flag overcharges (GGPoker charged more than schedule). Undercharges are
+    // expected — GGPoker uses incremental rake which can produce a lower effective
+    // rate than a simple % of final pot.
+    if (h.rakeVariance > 0.05) {
       rakeAnomalyHands.push({ handId: h.handId, reported: h.rake, expected: h.expectedRake })
     }
     if (h.runCount === 2) runItTwiceHands++
