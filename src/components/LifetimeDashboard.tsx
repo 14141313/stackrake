@@ -55,34 +55,16 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
     return allHands.length > 0 ? analyseSession(allHands) : null
   }, [records])
 
-  // Compute actual play time by summing consecutive inter-hand gaps under 60 min.
-  // This correctly handles hands from different days merged into one record —
-  // overnight gaps (> 60 min) are treated as session breaks and excluded.
+  // Sum of per-session play time: first hand to last hand within each record.
+  // Records are distinct upload sessions so each spans one continuous play period.
   const totalPlayMinutes = useMemo(() => {
-    const allTimestamps = records
-      .flatMap(r => r.hands.map(h => h.timestamp))
-      .sort((a, b) => a - b)
-    if (allTimestamps.length < 2) return 0
-    const BREAK_THRESHOLD_MS = 60 * 60_000 // 60 minutes
-    let total = 0
-    const bigGaps: number[] = []
-    for (let i = 1; i < allTimestamps.length; i++) {
-      const gap = allTimestamps[i] - allTimestamps[i - 1]
-      if (gap < BREAK_THRESHOLD_MS) {
-        total += gap
-      } else {
-        bigGaps.push(gap)
-      }
-    }
-    console.log('[duration debug]', {
-      firstTs: new Date(allTimestamps[0]).toISOString(),
-      lastTs: new Date(allTimestamps[allTimestamps.length - 1]).toISOString(),
-      totalHands: allTimestamps.length,
-      bigGapsExcluded: bigGaps.length,
-      bigGapsSample: bigGaps.slice(0, 5).map(g => `${(g / 60_000).toFixed(1)} min`),
-      totalPlayMin: (total / 60_000).toFixed(1),
-    })
-    return total / 60_000
+    return records.reduce((sum, rec) => {
+      if (rec.hands.length < 2) return sum
+      const timestamps = rec.hands.map(h => h.timestamp)
+      const first = Math.min(...timestamps)
+      const last = Math.max(...timestamps)
+      return sum + (last - first) / 60_000
+    }, 0)
   }, [records])
 
   // Total GEM cashback from snapshots
@@ -128,26 +110,6 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
 
   return (
     <div>
-      {/* Temporary duration debug — remove after fix */}
-      {(() => {
-        const allTs = records.flatMap(r => r.hands.map(h => h.timestamp)).sort((a,b)=>a-b)
-        const bigGaps: number[] = []
-        let play = 0
-        for (let i = 1; i < allTs.length; i++) {
-          const g = allTs[i] - allTs[i-1]
-          if (g < 3_600_000) play += g; else bigGaps.push(g)
-        }
-        return (
-          <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs font-mono text-yellow-900 space-y-0.5">
-            <div>first: {allTs[0]} → {new Date(allTs[0]).toISOString()}</div>
-            <div>last:  {allTs[allTs.length-1]} → {new Date(allTs[allTs.length-1]).toISOString()}</div>
-            <div>span: {((allTs[allTs.length-1]-allTs[0])/60000).toFixed(1)} min</div>
-            <div>big gaps excluded: {bigGaps.length} | samples: {bigGaps.slice(0,3).map(g=>(g/60000).toFixed(0)+'min').join(', ')}</div>
-            <div>gap-based play: {(play/60000).toFixed(1)} min = {(play/3600000).toFixed(2)} h</div>
-          </div>
-        )
-      })()}
-
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
