@@ -59,28 +59,12 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
   // field was introduced carry the correct value computed at upload time.
   // Legacy records (durationMinutes === 0) fall back to a gap-based estimate:
   // sum consecutive inter-hand gaps under 2h, excluding overnight breaks.
-  const totalPlayMinutes = useMemo(() => {
-    const total = records.reduce((sum, rec) => {
-      if (rec.durationMinutes > 0) return sum + rec.durationMinutes
-      // Fallback for legacy records without stored duration
-      const ts = rec.hands.map(h => h.timestamp).sort((a, b) => a - b)
-      if (ts.length < 2) return sum
-      const BREAK_MS = 2 * 60 * 60_000
-      let play = 0
-      for (let i = 1; i < ts.length; i++) {
-        const gap = ts[i] - ts[i - 1]
-        if (gap < BREAK_MS) play += gap
-      }
-      return sum + play / 60_000
-    }, 0)
-    if (import.meta.env.DEV && total > 24 * 60 && records.length < 5) {
-      console.warn(
-        `[stackrake] Dashboard shows ${(total / 60).toFixed(1)}h across ` +
-        `${records.length} session(s) — possible duration calculation bug`
-      )
-    }
-    return total
-  }, [records])
+  // durationMinutes on each record is corrected by App.tsx on load using the
+  // canonical calcDurationMinutes() from recalculate.ts. Simply sum here.
+  const totalPlayMinutes = useMemo(
+    () => records.reduce((sum, rec) => sum + rec.durationMinutes, 0),
+    [records]
+  )
 
   // Total GEM cashback from snapshots
   const totalGemCash = useMemo(() => {

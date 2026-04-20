@@ -3,19 +3,28 @@ import { OCEAN_TIERS, type TierName } from '../lib/tiers'
 import { Dialog, DialogTitle, DialogBody, DialogActions } from './ui/dialog'
 import { Button } from './ui/button'
 import { ErrorMessage } from './ui/fieldset'
+import { recalculateAll } from '../lib/recalculate'
+import { saveCloudRecord } from '../lib/storage'
+import type { SessionRecord } from '../lib/types'
 
 interface Props {
   currentTier: TierName
   userEmail: string
+  records: SessionRecord[]
+  onRecordsUpdated: (records: SessionRecord[]) => void
   onSave: (tier: TierName) => Promise<void>
   onClose: () => void
 }
 
-export function SettingsModal({ currentTier, userEmail, onSave, onClose }: Props) {
+export function SettingsModal({ currentTier, userEmail, records, onRecordsUpdated, onSave, onClose }: Props) {
   const [selectedTier, setSelectedTier] = useState<TierName>(currentTier)
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const [recalcLoading, setRecalcLoading] = useState(false)
+  const [recalcDone, setRecalcDone] = useState(false)
+  const [recalcError, setRecalcError] = useState<string | null>(null)
 
   const hasChanged = selectedTier !== currentTier
 
@@ -30,6 +39,21 @@ export function SettingsModal({ currentTier, userEmail, onSave, onClose }: Props
       setError(err instanceof Error ? err.message : 'Failed to save. Try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleRecalculate() {
+    setRecalcLoading(true)
+    setRecalcDone(false)
+    setRecalcError(null)
+    try {
+      const updated = await recalculateAll(records, saveCloudRecord)
+      onRecordsUpdated(updated)
+      setRecalcDone(true)
+    } catch (err: unknown) {
+      setRecalcError(err instanceof Error ? err.message : 'Recalculation failed.')
+    } finally {
+      setRecalcLoading(false)
     }
   }
 
@@ -104,6 +128,29 @@ export function SettingsModal({ currentTier, userEmail, onSave, onClose }: Props
           {saved && !hasChanged && (
             <p className="text-xs text-brand mb-3">✓ Tier saved</p>
           )}
+        </div>
+
+        {/* Data maintenance */}
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Data</p>
+          <p className="text-xs text-gray-500 mb-4">
+            Recompute session durations and derived metrics from raw hand data.
+            Safe to run at any time — does not modify your hand history.
+          </p>
+
+          {recalcError && <ErrorMessage className="mb-3">{recalcError}</ErrorMessage>}
+          {recalcDone && !recalcLoading && (
+            <p className="text-xs text-brand mb-3">✓ All sessions recalculated</p>
+          )}
+
+          <Button
+            variant="outline"
+            onClick={handleRecalculate}
+            disabled={recalcLoading || records.length === 0}
+            className="text-xs"
+          >
+            {recalcLoading ? 'Recalculating…' : 'Recalculate Data'}
+          </Button>
         </div>
       </DialogBody>
 

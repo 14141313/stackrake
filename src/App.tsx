@@ -3,6 +3,7 @@ import { splitHands } from './lib/splitHands'
 import { parseSessionHand } from './lib/parseSessionHand'
 import { analyseSession } from './lib/analyseSession'
 import { rawToHand, handToRaw, createRecord, loadCloudRecords, saveCloudRecord, deleteCloudRecord, loadGemSnapshots, shouldShowGemCheckIn } from './lib/storage'
+import { calcDurationMinutes } from './lib/recalculate'
 import { DEFAULT_TIER, type TierName } from './lib/tiers'
 import type { SessionRecord, SessionResult, GemSnapshot } from './lib/types'
 import { SessionLibrary } from './components/SessionLibrary'
@@ -70,9 +71,25 @@ export default function App() {
     setDataLoading(true)
     Promise.all([loadCloudRecords(), loadGemSnapshots()])
       .then(([recs, snaps]) => {
-        setRecords(recs)
+        // Correct durationMinutes for every record using the canonical
+        // gap-based logic. This silently fixes legacy records that were stored
+        // with the old first-to-last method — no user action required.
+        const corrected = recs.map(rec => {
+          const correct = calcDurationMinutes(rec.hands)
+          return rec.durationMinutes === correct ? rec : { ...rec, durationMinutes: correct }
+        })
+        setRecords(corrected)
         setGemSnapshots(snaps)
         setShowGemCheckIn(shouldShowGemCheckIn(snaps))
+
+        // Persist any records whose stored value differed. Fire-and-forget:
+        // the UI already has correct values in state.
+        const stale = corrected.filter((rec, i) => rec.durationMinutes !== recs[i].durationMinutes)
+        if (stale.length > 0) {
+          Promise.all(stale.map(saveCloudRecord)).catch(err =>
+            console.error('[stackrake] Failed to persist corrected durations:', err)
+          )
+        }
       })
       .catch(err => setCloudError(err.message ?? 'Failed to load data'))
       .finally(() => setDataLoading(false))
@@ -277,6 +294,8 @@ export default function App() {
         <SettingsModal
           currentTier={tier}
           userEmail={user.email ?? ''}
+          records={records}
+          onRecordsUpdated={setRecords}
           onSave={saveTierToAccount}
           onClose={() => setShowSettings(false)}
         />

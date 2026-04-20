@@ -1,5 +1,6 @@
 import type { SessionRecord, SessionHand, RawHand, GemSnapshot } from './types'
 import { supabase } from './supabase'
+import { calcDurationMinutes } from './recalculate'
 
 // ── Cloud CRUD (Supabase) ─────────────────────────────────────────────────────
 
@@ -162,27 +163,12 @@ export function clearRecords(): void {
   localStorage.removeItem(STORAGE_KEY)
 }
 
-/**
- * Compute actual play time in minutes by summing consecutive inter-hand gaps
- * under 2 hours. Gaps ≥ 2h are treated as breaks between separate playing
- * sessions and excluded. This correctly handles uploads containing files from
- * multiple playing days — overnight gaps are never counted as play time.
- */
-function calcPlayMinutes(hands: SessionHand[]): number {
-  if (hands.length < 2) return 0
-  const ts = hands.map(h => h.timestamp.getTime()).sort((a, b) => a - b)
-  const BREAK_MS = 2 * 60 * 60_000 // 2 hours
-  let playMs = 0
-  for (let i = 1; i < ts.length; i++) {
-    const gap = ts[i] - ts[i - 1]
-    if (gap < BREAK_MS) playMs += gap
-  }
-  return Math.round((playMs / 60_000) * 100) / 100
-}
-
 /** Create a new SessionRecord from parsed hands + file names. */
 export function createRecord(hands: SessionHand[], fileNames: string[]): SessionRecord {
-  const durationMinutes = calcPlayMinutes(hands)
+  // SessionHand.timestamp is a Date; calcDurationMinutes expects ms numbers.
+  const durationMinutes = calcDurationMinutes(
+    hands.map(h => ({ timestamp: h.timestamp.getTime() }))
+  )
 
   // Sanity check: > 12h of actual play time is extremely unlikely for a single
   // upload and almost certainly indicates a data or parsing error.
