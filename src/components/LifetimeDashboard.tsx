@@ -65,10 +65,23 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
     if (allTimestamps.length < 2) return 0
     const BREAK_THRESHOLD_MS = 60 * 60_000 // 60 minutes
     let total = 0
+    const bigGaps: number[] = []
     for (let i = 1; i < allTimestamps.length; i++) {
       const gap = allTimestamps[i] - allTimestamps[i - 1]
-      if (gap < BREAK_THRESHOLD_MS) total += gap
+      if (gap < BREAK_THRESHOLD_MS) {
+        total += gap
+      } else {
+        bigGaps.push(gap)
+      }
     }
+    console.log('[duration debug]', {
+      firstTs: new Date(allTimestamps[0]).toISOString(),
+      lastTs: new Date(allTimestamps[allTimestamps.length - 1]).toISOString(),
+      totalHands: allTimestamps.length,
+      bigGapsExcluded: bigGaps.length,
+      bigGapsSample: bigGaps.slice(0, 5).map(g => `${(g / 60_000).toFixed(1)} min`),
+      totalPlayMin: (total / 60_000).toFixed(1),
+    })
     return total / 60_000
   }, [records])
 
