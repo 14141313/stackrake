@@ -55,6 +55,8 @@ export interface SessionHand {
   expectedRake: number
   /** reported rake − expected rake (positive = overcharged, negative = undercharged) */
   rakeVariance: number
+  /** how many times the board was run (1 = standard, 2 = run-it-twice, 3 = run-it-three-times) */
+  runCount: 1 | 2 | 3
 }
 
 // ── GEM snapshots ─────────────────────────────────────────────────────────────
@@ -124,6 +126,10 @@ export interface SessionResult {
   bbPer100: number
   dollarsPerHour: number
   positionBreakdown: Record<Position, PositionStats>
+  /** hands where the board was run twice */
+  runItTwiceHands: number
+  /** hands where the board was run three times */
+  runItThreeHands: number
   /** whether any all-in hand has a computable EV (villain cards known) */
   hasEVData: boolean
   /** cumulative net at each hand (sorted by timestamp) */

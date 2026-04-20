@@ -71,6 +71,7 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
     netResult, grossResult, totalHeroRake,
     handsPlayed, vpipHands, bbPer100,
     dollarsPerHour, durationMinutes, stakes,
+    runItTwiceHands, runItThreeHands,
   } = lifetimeResult
 
   const tierCfg = getTierConfig(tier)
@@ -141,7 +142,11 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
         <Card
           label="Hands"
           value={handsPlayed.toLocaleString()}
-          sub={`${records.length} session${records.length !== 1 ? 's' : ''}`}
+          sub={[
+            `${records.length} session${records.length !== 1 ? 's' : ''}`,
+            runItTwiceHands > 0 ? `${runItTwiceHands} run-it-twice` : null,
+            runItThreeHands > 0 ? `${runItThreeHands} run-it-3x` : null,
+          ].filter(Boolean).join(' · ')}
           valueColor="text-brand"
         />
 

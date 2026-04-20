@@ -11,9 +11,12 @@ const SEAT_RE = /^Seat (\d+): (.+?) \((?:you\) )?\(?\$?([\d,.]+) in chips\)?/
 const SEAT_YOU_RE = /^Seat (\d+): (.+?) \(you\)/
 const BUTTON_RE = /^Table .+ Seat #(\d+) is the button/
 
-const FLOP_RE = /^\*\*\* FLOP \*\*\* \[(\S+) (\S+) (\S+)\]/
-const TURN_RE = /^\*\*\* TURN \*\*\* \[.+\] \[(\S+)\]/
-const RIVER_RE = /^\*\*\* RIVER \*\*\* \[.+\] \[(\S+)\]/
+// Match both standard and run-it-multiple-times first-board section headers
+const FLOP_RE  = /^\*\*\* (?:FIRST )?FLOP \*\*\* \[(\S+) (\S+) (\S+)\]/
+const TURN_RE  = /^\*\*\* (?:FIRST )?TURN \*\*\* \[.+\] \[(\S+)\]/
+const RIVER_RE = /^\*\*\* (?:FIRST )?RIVER \*\*\* \[.+\] \[(\S+)\]/
+const RUN_TWO_RE   = /Hand was run two times/i
+const RUN_THREE_RE = /Hand was run three times/i
 const TOTAL_POT_RE = /Total pot \$?([\d.]+).*?\|\s*Rake \$?([\d.]+)(?:\s*\|\s*Jackpot \$?([\d.]+))?(?:\s*\|\s*Bingo \$?([\d.]+))?(?:\s*\|\s*Fortune \$?([\d.]+))?(?:\s*\|\s*Tax \$?([\d.]+))?/
 const HOLE_CARDS_RE = /Dealt to Hero \[(.+?)\]/
 // Hero's collected amount from summary
@@ -150,25 +153,29 @@ export function parseSessionHand(hand: string): SessionHand | null {
     // Section markers
     if (line.startsWith('*** SUMMARY ***')) { inSummary = true; continue }
     if (line.startsWith('*** HOLE CARDS ***')) continue
-    if (line.startsWith('*** FLOP ***')) {
+
+    // Skip second/third runout section markers — we only build board from first run
+    if (line.startsWith('*** SECOND') || line.startsWith('*** THIRD')) continue
+
+    if (line.startsWith('*** FLOP ***') || line.startsWith('*** FIRST FLOP ***')) {
       currentStreet = 'flop'
       const fm = line.match(FLOP_RE)
       if (fm) board.push(fm[1], fm[2], fm[3])
       continue
     }
-    if (line.startsWith('*** TURN ***')) {
+    if (line.startsWith('*** TURN ***') || line.startsWith('*** FIRST TURN ***')) {
       currentStreet = 'turn'
       const tm = line.match(TURN_RE)
       if (tm) board.push(tm[1])
       continue
     }
-    if (line.startsWith('*** RIVER ***')) {
+    if (line.startsWith('*** RIVER ***') || line.startsWith('*** FIRST RIVER ***')) {
       currentStreet = 'river'
       const rm = line.match(RIVER_RE)
       if (rm) board.push(rm[1])
       continue
     }
-    if (line.startsWith('*** SHOWDOWN ***')) continue
+    if (line.startsWith('*** SHOWDOWN ***') || line.startsWith('*** FIRST SHOWDOWN ***')) continue
     // Skip "Dealt to" card lines — not action lines
     if (line.startsWith('Dealt to')) continue
 
@@ -231,6 +238,18 @@ export function parseSessionHand(hand: string): SessionHand | null {
   }
 
   const heroContributed = heroCommitted.preflop + heroCommitted.flop + heroCommitted.turn + heroCommitted.river
+
+  // Detect run-it-multiple-times
+  const runCount: 1 | 2 | 3 = RUN_THREE_RE.test(hand) ? 3 : RUN_TWO_RE.test(hand) ? 2 : 1
+
+  // Deduplicate villain cards — run-it-twice shows same cards in each showdown section
+  const vcSeen = new Set<string>()
+  const uniqueVillainCards = villainCards.filter(vc => {
+    const key = [...vc].sort().join(',')
+    if (vcSeen.has(key)) return false
+    vcSeen.add(key)
+    return true
+  })
 
   // ── Parse rake + Hero's collected amount from SUMMARY ─────────────────────
 
@@ -311,11 +330,12 @@ export function parseSessionHand(hand: string): SessionHand | null {
     isAllIn,
     holeCards,
     boardAtAllIn,
-    villainCards,
+    villainCards: uniqueVillainCards,
     totalPot,
     hadFlop,
     preflopRaiseCount,
     expectedRake,
     rakeVariance,
+    runCount,
   }
 }

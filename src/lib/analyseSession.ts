@@ -59,6 +59,8 @@ export function analyseSession(rawHands: SessionHand[]): SessionResult {
   const deductionBreakdown = { rake: 0, jackpot: 0, bingo: 0, fortune: 0, tax: 0 }
   const unreconciledHands: Array<{ handId: string; diff: number }> = []
   const rakeAnomalyHands: Array<{ handId: string; reported: number; expected: number }> = []
+  let runItTwiceHands = 0
+  let runItThreeHands = 0
 
   const posAccumulators: Record<Position, PositionStats> = Object.fromEntries(
     ALL_POSITIONS.map(p => [p, { net: 0, hands: 0, vpipHands: 0, rake: 0 }])
@@ -86,6 +88,8 @@ export function analyseSession(rawHands: SessionHand[]): SessionResult {
     if (Math.abs(h.rakeVariance) > 0.02) {
       rakeAnomalyHands.push({ handId: h.handId, reported: h.rake, expected: h.expectedRake })
     }
+    if (h.runCount === 2) runItTwiceHands++
+    if (h.runCount === 3) runItThreeHands++
 
     // Compute EV for all-in hands where we have villain cards
     let evNet = h.heroNet  // default: actual result
@@ -166,6 +170,8 @@ export function analyseSession(rawHands: SessionHand[]): SessionResult {
     bbPer100,
     dollarsPerHour,
     positionBreakdown: posAccumulators,
+    runItTwiceHands,
+    runItThreeHands,
     hasEVData,
     cumulativePnL,
   }
@@ -194,6 +200,8 @@ function emptyResult(): SessionResult {
     bbPer100: 0,
     dollarsPerHour: 0,
     positionBreakdown: emptyPos,
+    runItTwiceHands: 0,
+    runItThreeHands: 0,
     hasEVData: false,
     cumulativePnL: [],
   }

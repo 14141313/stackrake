@@ -57,6 +57,8 @@ export function SummaryStrip({ result }: Props) {
     dateRange,
     stakes,
     tableIds,
+    runItTwiceHands,
+    runItThreeHands,
   } = result
 
   const netColor = netResult > 0 ? 'text-positive' : netResult < 0 ? 'text-negative' : 'text-gray-900'
@@ -102,7 +104,11 @@ export function SummaryStrip({ result }: Props) {
       <Card
         label="Hands"
         value={handsPlayed.toLocaleString()}
-        sub={`${tableIds.length} table${tableIds.length !== 1 ? 's' : ''}`}
+        sub={[
+          `${tableIds.length} table${tableIds.length !== 1 ? 's' : ''}`,
+          runItTwiceHands > 0 ? `${runItTwiceHands} run-it-twice` : null,
+          runItThreeHands > 0 ? `${runItThreeHands} run-it-3x` : null,
+        ].filter(Boolean).join(' · ')}
         valueColor="text-brand"
       />
       <Card
