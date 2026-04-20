@@ -162,25 +162,35 @@ export function clearRecords(): void {
   localStorage.removeItem(STORAGE_KEY)
 }
 
+/**
+ * Compute actual play time in minutes by summing consecutive inter-hand gaps
+ * under 2 hours. Gaps ≥ 2h are treated as breaks between separate playing
+ * sessions and excluded. This correctly handles uploads containing files from
+ * multiple playing days — overnight gaps are never counted as play time.
+ */
+function calcPlayMinutes(hands: SessionHand[]): number {
+  if (hands.length < 2) return 0
+  const ts = hands.map(h => h.timestamp.getTime()).sort((a, b) => a - b)
+  const BREAK_MS = 2 * 60 * 60_000 // 2 hours
+  let playMs = 0
+  for (let i = 1; i < ts.length; i++) {
+    const gap = ts[i] - ts[i - 1]
+    if (gap < BREAK_MS) playMs += gap
+  }
+  return Math.round((playMs / 60_000) * 100) / 100
+}
+
 /** Create a new SessionRecord from parsed hands + file names. */
 export function createRecord(hands: SessionHand[], fileNames: string[]): SessionRecord {
-  // Duration = last hand timestamp − first hand timestamp for this upload batch.
-  // Calculated once at upload time so the dashboard never has to re-derive it
-  // across session boundaries from raw stored timestamps.
-  let durationMinutes = 0
-  if (hands.length >= 2) {
-    const timestamps = hands.map(h => h.timestamp.getTime())
-    durationMinutes = Math.round(
-      ((Math.max(...timestamps) - Math.min(...timestamps)) / 60_000) * 100
-    ) / 100
-    // Sanity check: a single cash game session > 12h is almost certainly a
-    // multi-session upload or a timestamp parsing error.
-    if (durationMinutes > 12 * 60) {
-      console.warn(
-        `[stackrake] Session duration ${(durationMinutes / 60).toFixed(1)}h exceeds 12h — ` +
-        `possible multi-session upload or timestamp error. Files: ${fileNames.join(', ')}`
-      )
-    }
+  const durationMinutes = calcPlayMinutes(hands)
+
+  // Sanity check: > 12h of actual play time is extremely unlikely for a single
+  // upload and almost certainly indicates a data or parsing error.
+  if (durationMinutes > 12 * 60) {
+    console.warn(
+      `[stackrake] Session duration ${(durationMinutes / 60).toFixed(1)}h exceeds 12h — ` +
+      `possible multi-session upload or timestamp error. Files: ${fileNames.join(', ')}`
+    )
   }
 
   return {

@@ -144,12 +144,11 @@ export default function App() {
         .map(handToRaw)
       const mergedRaw = [...existingRec.hands, ...trulyNewRaw]
       const base = createRecord(newHands, names)
-      // Recompute duration from the full merged hand set so it stays accurate.
-      // Use first-to-last timestamp of the merged batch.
-      const mergedTs = mergedRaw.map(h => h.timestamp)
-      const mergedDuration = mergedTs.length >= 2
-        ? Math.round(((Math.max(...mergedTs) - Math.min(...mergedTs)) / 60_000) * 100) / 100
-        : 0
+      // Recompute duration for the merged set using the same gap-based logic
+      // as createRecord — so adding hands to an existing session never inflates
+      // the duration with calendar gaps.
+      const mergedHands = mergedRaw.map(rawToHand)
+      const mergedDuration = createRecord(mergedHands, base.fileNames).durationMinutes
       record = {
         ...base,
         id: overlappingId,
