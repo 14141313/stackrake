@@ -39,7 +39,7 @@ export function Dialog({ open, onClose, size = 'md', children }: DialogProps) {
 
 export function DialogTitle({ className, children, ...props }: React.ComponentPropsWithoutRef<typeof HeadlessDialogTitle>) {
   return (
-    <HeadlessDialogTitle {...props} className={clsx('text-base font-semibold text-gray-900 font-mono', className)}>
+    <HeadlessDialogTitle {...props} className={clsx('text-base font-semibold text-gray-900', className)}>
       {children}
     </HeadlessDialogTitle>
   )

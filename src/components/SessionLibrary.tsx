@@ -3,12 +3,10 @@ import type { SessionRecord } from '../lib/types'
 import { rawToHand } from '../lib/storage'
 import { analyseSession } from '../lib/analyseSession'
 import { Select } from './ui/select'
-import { Button } from './ui/button'
 
 interface Props {
   records: SessionRecord[]
   onView: (recordId: string, stakeKey: string | null) => void
-  onDelete: (recordId: string) => void
   onUpload: () => void
   /** When true, suppresses the standalone header + empty state (used inside LifetimeDashboard) */
   hideDashboard?: boolean
@@ -48,7 +46,7 @@ function sessionDateStr(ts: number): string {
   return new Date(ts).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export function SessionLibrary({ records, onView, onDelete, onUpload, hideDashboard = false }: Props) {
+export function SessionLibrary({ records, onView, onUpload, hideDashboard = false }: Props) {
   const [filterSite, setFilterSite] = useState<string>('all')
   const [filterStake, setFilterStake] = useState<string>('all')
 
@@ -146,7 +144,7 @@ export function SessionLibrary({ records, onView, onDelete, onUpload, hideDashbo
   if (records.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
-        <h1 className="text-2xl font-mono text-gray-900 mb-1">Stackrake</h1>
+        <h1 className="text-2xl text-gray-900 mb-1">Stackrake</h1>
         <p className="text-gray-500 text-sm mb-10">PLO analytics · GGPoker & Natural8 · Client-side</p>
         <button
           onClick={onUpload}
@@ -166,12 +164,12 @@ export function SessionLibrary({ records, onView, onDelete, onUpload, hideDashbo
       {!hideDashboard && (
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-lg font-mono text-gray-900">Sessions</h1>
+            <h1 className="text-lg text-gray-900">Sessions</h1>
             <p className="text-xs text-gray-500 mt-0.5">{records.length} session{records.length !== 1 ? 's' : ''} stored</p>
           </div>
           <button
             onClick={onUpload}
-            className="px-4 py-2 rounded-lg border border-brand text-brand text-xs font-mono hover:bg-brand-light transition-colors"
+            className="px-4 py-2 rounded-lg border border-brand text-brand text-xs hover:bg-brand-light transition-colors"
           >
             + Upload Session
           </button>
@@ -191,7 +189,7 @@ export function SessionLibrary({ records, onView, onDelete, onUpload, hideDashbo
           <Select
             value={filterSite}
             onChange={e => setFilterSite((e.target as HTMLSelectElement).value)}
-            className="text-xs font-mono py-1.5 w-auto"
+            className="text-xs py-1.5 w-auto"
           >
             <option value="all">All Sites</option>
             {sites.map(s => <option key={s} value={s}>{s}</option>)}
@@ -201,7 +199,7 @@ export function SessionLibrary({ records, onView, onDelete, onUpload, hideDashbo
           <Select
             value={filterStake}
             onChange={e => setFilterStake((e.target as HTMLSelectElement).value)}
-            className="text-xs font-mono py-1.5 w-auto"
+            className="text-xs py-1.5 w-auto"
           >
             <option value="all">All Stakes</option>
             {stakes.map(k => {
@@ -250,26 +248,26 @@ export function SessionLibrary({ records, onView, onDelete, onUpload, hideDashbo
                   className="grid grid-cols-[140px_90px_110px_60px_100px_80px_80px_64px_80px] px-4 py-2.5 hover:bg-gray-50 items-center"
                 >
                   {/* Date — only on first row of session */}
-                  <span className="text-xs font-mono text-gray-600">
+                  <span className="text-xs text-gray-600">
                     {i === 0 ? sessionDate : ''}
                   </span>
                   <span className="text-xs text-gray-500">{row.site}</span>
-                  <span className="text-xs font-mono text-gray-700">{row.stakeLabel}</span>
-                  <span className="text-xs font-mono text-gray-600 text-right">{row.hands}</span>
-                  <span className={`text-xs font-mono text-right font-semibold ${row.net > 0 ? 'text-positive' : row.net < 0 ? 'text-negative' : 'text-gray-900'}`}>
+                  <span className="text-xs text-gray-700">{row.stakeLabel}</span>
+                  <span className="text-xs text-gray-600 text-right">{row.hands}</span>
+                  <span className={`text-xs text-right font-semibold ${row.net > 0 ? 'text-positive' : row.net < 0 ? 'text-negative' : 'text-gray-900'}`}>
                     {sign(row.net)}
                   </span>
-                  <span className={`text-xs font-mono text-right ${row.bb100 > 0 ? 'text-positive' : row.bb100 < 0 ? 'text-negative' : 'text-gray-600'}`}>
+                  <span className={`text-xs text-right ${row.bb100 > 0 ? 'text-positive' : row.bb100 < 0 ? 'text-negative' : 'text-gray-600'}`}>
                     {fmtBB(row.bb100)}
                   </span>
-                  <span className={`text-xs font-mono text-right ${row.dollarsPerHour > 0 ? 'text-positive' : row.dollarsPerHour < 0 ? 'text-negative' : 'text-gray-600'}`}>
+                  <span className={`text-xs text-right ${row.dollarsPerHour > 0 ? 'text-positive' : row.dollarsPerHour < 0 ? 'text-negative' : 'text-gray-600'}`}>
                     {sign(row.dollarsPerHour)}
                   </span>
-                  <span className="text-xs font-mono text-gray-500 text-right">${row.rake.toFixed(2)}</span>
+                  <span className="text-xs text-gray-500 text-right">${row.rake.toFixed(2)}</span>
                   <div className="flex justify-end">
                     <button
                       onClick={() => onView(recordId, row.stakeKey)}
-                      className="text-xs text-gray-400 hover:text-brand transition-colors font-mono"
+                      className="text-xs text-gray-400 hover:text-brand transition-colors"
                     >
                       View →
                     </button>
@@ -281,40 +279,21 @@ export function SessionLibrary({ records, onView, onDelete, onUpload, hideDashbo
               {sessionRows.length > 1 && (
                 <div className="grid grid-cols-[140px_90px_110px_60px_100px_80px_80px_64px_80px] px-4 py-2 bg-gray-50 items-center">
                   <span className="text-xs text-gray-500 col-span-3">Session total</span>
-                  <span className="text-xs font-mono text-gray-500 text-right">{sessionHands}</span>
-                  <span className={`text-xs font-mono font-semibold text-right ${sessionNet > 0 ? 'text-positive' : sessionNet < 0 ? 'text-negative' : 'text-gray-900'}`}>
+                  <span className="text-xs text-gray-500 text-right">{sessionHands}</span>
+                  <span className={`text-xs font-semibold text-right ${sessionNet > 0 ? 'text-positive' : sessionNet < 0 ? 'text-negative' : 'text-gray-900'}`}>
                     {sign(sessionNet)}
                   </span>
                   <span className="text-xs text-gray-300 text-right">—</span>
                   <span className="text-xs text-gray-300 text-right">—</span>
-                  <span className="text-xs font-mono text-gray-400 text-right">${sessionRake.toFixed(2)}</span>
-                  <div className="flex justify-end gap-2">
+                  <span className="text-xs text-gray-400 text-right">${sessionRake.toFixed(2)}</span>
+                  <div className="flex justify-end">
                     <button
                       onClick={() => onView(recordId, null)}
-                      className="text-xs text-gray-400 hover:text-brand transition-colors font-mono"
+                      className="text-xs text-gray-400 hover:text-brand transition-colors"
                     >
                       All →
                     </button>
-                    <Button
-                      variant="plain"
-                      onClick={() => onDelete(recordId)}
-                      className="text-xs text-gray-400 hover:text-negative transition-colors px-1 py-0.5"
-                    >
-                      ✕
-                    </Button>
                   </div>
-                </div>
-              )}
-              {/* Delete button for single-stake sessions */}
-              {sessionRows.length === 1 && (
-                <div className="flex justify-end px-4 pb-1">
-                  <Button
-                    variant="plain"
-                    onClick={() => onDelete(recordId)}
-                    className="text-xs text-gray-400 hover:text-negative transition-colors px-1 py-0.5"
-                  >
-                    ✕ delete
-                  </Button>
                 </div>
               )}
             </div>
@@ -325,13 +304,13 @@ export function SessionLibrary({ records, onView, onDelete, onUpload, hideDashbo
         {filtered.length > 0 && (
           <div className="grid grid-cols-[140px_90px_110px_60px_100px_80px_80px_64px_80px] px-4 py-3 border-t border-gray-200 bg-gray-50">
             <span className="text-xs text-gray-500 col-span-3 font-semibold">Lifetime total</span>
-            <span className="text-xs font-mono text-gray-600 text-right font-semibold">{totals.hands}</span>
-            <span className={`text-xs font-mono font-semibold text-right ${totals.net > 0 ? 'text-positive' : totals.net < 0 ? 'text-negative' : 'text-gray-900'}`}>
+            <span className="text-xs text-gray-600 text-right font-semibold">{totals.hands}</span>
+            <span className={`text-xs font-semibold text-right ${totals.net > 0 ? 'text-positive' : totals.net < 0 ? 'text-negative' : 'text-gray-900'}`}>
               {sign(totals.net)}
             </span>
             <span className="text-xs text-gray-300 text-right">—</span>
             <span className="text-xs text-gray-300 text-right">—</span>
-            <span className="text-xs font-mono text-gray-500 text-right">${totals.rake.toFixed(2)}</span>
+            <span className="text-xs text-gray-500 text-right">${totals.rake.toFixed(2)}</span>
             <span></span>
           </div>
         )}

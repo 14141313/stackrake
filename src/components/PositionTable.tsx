@@ -38,7 +38,7 @@ export function PositionTable({ result }: Props) {
   return (
     <div className="bg-white rounded-xl p-6 mb-6 border border-gray-100 shadow-sm">
       <h2 className="text-xs text-gray-500 uppercase tracking-wider mb-4">Win / Loss by Position</h2>
-      <Table className="w-full font-mono">
+      <Table className="w-full">
         <TableHead>
           <TableRow>
             <TableHeader className="text-left pb-2 pr-4">Pos</TableHeader>

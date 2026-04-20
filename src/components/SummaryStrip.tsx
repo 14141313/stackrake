@@ -18,8 +18,8 @@ function Card({
   return (
     <div className="bg-white rounded-xl p-4 flex flex-col gap-1 min-w-0 border border-gray-100 shadow-sm">
       <span className="text-xs text-gray-500 uppercase tracking-wider">{label}</span>
-      <span className={`font-mono text-xl ${valueColor ?? 'text-gray-900'}`}>{value}</span>
-      {sub && <span className="text-xs text-gray-500 font-mono">{sub}</span>}
+      <span className={`text-xl ${valueColor ?? 'text-gray-900'}`}>{value}</span>
+      {sub && <span className="text-xs text-gray-500">{sub}</span>}
     </div>
   )
 }

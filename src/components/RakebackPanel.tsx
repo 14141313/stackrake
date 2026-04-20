@@ -87,7 +87,7 @@ export function RakebackPanel({ result, snapshots, tier }: Props) {
         {/* Tier display (read-only — update via account settings) */}
         <div>
           <label className="block text-xs text-gray-500 mb-2">Ocean Rewards Tier</label>
-          <div className="p-3 rounded-lg bg-gray-50 border border-gray-100 text-xs font-mono">
+          <div className="p-3 rounded-lg bg-gray-50 border border-gray-100 text-xs">
             <span className="text-brand">{tier}</span>
             <span className="text-gray-400 mx-2">·</span>
             <span className="text-gray-600">{Math.round(tierPct * 100)}% rakeback</span>
@@ -100,7 +100,7 @@ export function RakebackPanel({ result, snapshots, tier }: Props) {
           {latestSnapshot && (
             <div className="mt-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
               <p className="text-xs text-gray-500 mb-1">GEM Balance ({monthLabel(latestSnapshot.month)})</p>
-              <p className="text-sm font-mono text-gray-700">{latestSnapshot.balance.toLocaleString()} GEMs</p>
+              <p className="text-sm text-gray-700">{latestSnapshot.balance.toLocaleString()} GEMs</p>
               <p className="text-xs text-gray-500 mt-0.5">${(latestSnapshot.balance / GEMS_PER_DOLLAR).toFixed(2)} unredeemed value</p>
             </div>
           )}
@@ -116,7 +116,7 @@ export function RakebackPanel({ result, snapshots, tier }: Props) {
           {hasMonthlyData ? (
             <div className="space-y-2">
               {monthlyGems.slice(-3).reverse().map(m => (
-                <div key={m.month} className="flex justify-between items-center text-xs font-mono py-1.5 border-b border-gray-100 last:border-0">
+                <div key={m.month} className="flex justify-between items-center text-xs py-1.5 border-b border-gray-100 last:border-0">
                   <span className="text-gray-500">{monthLabel(m.month)}</span>
                   <div className="text-right">
                     <span className="text-gray-700">+{m.earned.toLocaleString()} GEMs</span>
@@ -127,7 +127,7 @@ export function RakebackPanel({ result, snapshots, tier }: Props) {
                 </div>
               ))}
               {totalGemCash > 0 && (
-                <div className="flex justify-between items-center text-xs font-mono pt-1">
+                <div className="flex justify-between items-center text-xs pt-1">
                   <span className="text-gray-500">Total cashed out</span>
                   <span className="text-brand font-semibold">{sign(totalGemCash)}</span>
                 </div>
@@ -176,7 +176,7 @@ export function RakebackPanel({ result, snapshots, tier }: Props) {
             {/* True cost section */}
             <div>
               <p className="text-xs text-gray-500 mb-2">True cost of playing</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs font-mono">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs">
                 <DeductRow label="Rake" value={b.rake} note="TP calculated on this" />
                 {b.tax > 0 && <DeductRow label="Tax" value={b.tax} highlight />}
                 <div className="col-span-full border-t border-gray-100 pt-2 mt-1 flex justify-between">
@@ -193,7 +193,7 @@ export function RakebackPanel({ result, snapshots, tier }: Props) {
                   Redistributed to player pool
                   <span className="text-gray-400 ml-1">— EV-neutral over large samples</span>
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs font-mono">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs">
                   {b.jackpot > 0 && <DeductRow label="Jackpot" value={b.jackpot} note="returned to bad-beat winners" />}
                   {b.bingo   > 0 && <DeductRow label="Bingo"   value={b.bingo}   note="returned to bingo prize pool" />}
                   {b.fortune > 0 && <DeductRow label="Fortune" value={b.fortune} note="returned to fortune prize pool" />}
@@ -207,7 +207,7 @@ export function RakebackPanel({ result, snapshots, tier }: Props) {
 
             {/* Grand total */}
             {hasExtra && (
-              <div className="flex justify-between items-center text-xs font-mono border-t border-gray-100 pt-2">
+              <div className="flex justify-between items-center text-xs border-t border-gray-100 pt-2">
                 <span className="text-gray-500">Total deducted from pots</span>
                 <span className="text-gray-600">${totalDed.toFixed(2)}</span>
               </div>
@@ -218,14 +218,14 @@ export function RakebackPanel({ result, snapshots, tier }: Props) {
               <div className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
                 <span className="text-orange-600 text-sm mt-0.5">⚠</span>
                 <div>
-                  <p className="text-xs text-orange-600 font-mono font-semibold">
+                  <p className="text-xs text-orange-600 font-semibold">
                     {result.rakeAnomalyHands.length} rake anomal{result.rakeAnomalyHands.length !== 1 ? 'ies' : 'y'} detected
                   </p>
                   <p className="text-xs text-orange-500 mt-0.5">
                     Reported rake differs from the GGPoker schedule by &gt;$0.02.
                     Max variance: ${Math.max(...result.rakeAnomalyHands.map(h => Math.abs(h.reported - h.expected))).toFixed(2)}
                   </p>
-                  <p className="text-xs text-orange-500 mt-1 font-mono">
+                  <p className="text-xs text-orange-500 mt-1">
                     IDs: {result.rakeAnomalyHands.slice(0, 5).map(h => h.handId).join(', ')}
                     {result.rakeAnomalyHands.length > 5 ? ` +${result.rakeAnomalyHands.length - 5} more` : ''}
                   </p>
@@ -238,14 +238,14 @@ export function RakebackPanel({ result, snapshots, tier }: Props) {
               <div className="flex items-start gap-2 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
                 <span className="text-yellow-700 text-sm mt-0.5">⚠</span>
                 <div>
-                  <p className="text-xs text-yellow-700 font-mono font-semibold">
+                  <p className="text-xs text-yellow-700 font-semibold">
                     {result.unreconciledHands.length} unreconciled hand{result.unreconciledHands.length !== 1 ? 's' : ''}
                   </p>
                   <p className="text-xs text-yellow-600 mt-0.5">
                     Pot total minus deductions minus collected amounts don't balance.
                     Max discrepancy: ${Math.max(...result.unreconciledHands.map(h => Math.abs(h.diff))).toFixed(2)}
                   </p>
-                  <p className="text-xs text-yellow-500 mt-1 font-mono">
+                  <p className="text-xs text-yellow-500 mt-1">
                     IDs: {result.unreconciledHands.slice(0, 5).map(h => h.handId).join(', ')}
                     {result.unreconciledHands.length > 5 ? ` +${result.unreconciledHands.length - 5} more` : ''}
                   </p>
@@ -293,7 +293,7 @@ function Row({
     <div className="flex justify-between items-baseline gap-2">
       <span className="text-xs text-gray-500 shrink-0">{label}</span>
       <div className="text-right">
-        <span className={`font-mono text-sm ${bold ? 'font-semibold' : ''} ${valueColor ?? 'text-gray-900'}`}>
+        <span className={`text-sm ${bold ? 'font-semibold' : ''} ${valueColor ?? 'text-gray-900'}`}>
           {value}
         </span>
         {note && <div className="text-xs text-gray-400">{note}</div>}

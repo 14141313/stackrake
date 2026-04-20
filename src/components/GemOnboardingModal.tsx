@@ -53,7 +53,7 @@ export function GemOnboardingModal({ onComplete }: Props) {
       {step === 'tier' && (
         <>
           <div className="mb-6">
-            <h2 className="text-gray-900 font-mono text-base mb-1">Your Ocean Rewards tier</h2>
+            <h2 className="text-gray-900 text-base mb-1">Your Ocean Rewards tier</h2>
             <p className="text-gray-500 text-xs mb-4">
               Select your current tier — this sets your rakeback rate and GEM multiplier.
               You can update it anytime in account settings.
@@ -63,7 +63,7 @@ export function GemOnboardingModal({ onComplete }: Props) {
                 <button
                   key={t.name}
                   onClick={() => setSelectedTier(t.name)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-mono border transition-colors ${
+                  className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
                     selectedTier === t.name
                       ? 'border-brand text-brand bg-brand-light'
                       : 'border-gray-200 text-gray-500 hover:border-brand/50 hover:text-brand'
@@ -76,7 +76,7 @@ export function GemOnboardingModal({ onComplete }: Props) {
             {(() => {
               const cfg = OCEAN_TIERS.find(t => t.name === selectedTier)!
               return (
-                <div className="mt-4 p-3 rounded-lg bg-gray-50 border border-gray-100 text-xs font-mono">
+                <div className="mt-4 p-3 rounded-lg bg-gray-50 border border-gray-100 text-xs">
                   <span className="text-brand">{selectedTier}</span>
                   <span className="text-gray-400 mx-2">·</span>
                   <span className="text-gray-600">{Math.round(cfg.pct * 100)}% rakeback</span>
@@ -89,7 +89,7 @@ export function GemOnboardingModal({ onComplete }: Props) {
           <Button
             variant="solid"
             onClick={() => setStep('explain')}
-            className="w-full py-2.5 font-mono"
+            className="w-full py-2.5"
           >
             Next →
           </Button>
@@ -107,7 +107,7 @@ export function GemOnboardingModal({ onComplete }: Props) {
             >
               ← Back
             </Button>
-            <h2 className="text-gray-900 font-mono text-base mb-3">One last thing</h2>
+            <h2 className="text-gray-900 text-base mb-3">One last thing</h2>
             <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
               <p>
                 Your session stats look great — but your <span className="text-gray-900">true winrate</span> includes rakeback, and GEMs are a big part of that on GGPoker.
@@ -126,7 +126,7 @@ export function GemOnboardingModal({ onComplete }: Props) {
           <Button
             variant="solid"
             onClick={() => setStep('form')}
-            className="w-full py-2.5 font-mono"
+            className="w-full py-2.5"
           >
             Set my baseline →
           </Button>
@@ -144,7 +144,7 @@ export function GemOnboardingModal({ onComplete }: Props) {
             >
               ← Back
             </Button>
-            <h2 className="text-gray-900 font-mono text-base mb-1">Your GEM baseline</h2>
+            <h2 className="text-gray-900 text-base mb-1">Your GEM baseline</h2>
             <p className="text-gray-500 text-xs">
               Just this once — next month we'll only ask for your updated balance and any redemptions.
             </p>
@@ -161,7 +161,6 @@ export function GemOnboardingModal({ onComplete }: Props) {
                 placeholder="e.g. 8500"
                 value={balance}
                 onChange={e => setBalance(e.target.value)}
-                className="font-mono"
               />
             </Field>
 
@@ -175,7 +174,6 @@ export function GemOnboardingModal({ onComplete }: Props) {
                 placeholder="0"
                 value={redeemed}
                 onChange={e => setRedeemed(e.target.value)}
-                className="font-mono"
               />
             </Field>
 
@@ -185,7 +183,7 @@ export function GemOnboardingModal({ onComplete }: Props) {
               type="submit"
               variant="solid"
               disabled={loading}
-              className="w-full py-2.5 font-mono"
+              className="w-full py-2.5"
             >
               {loading ? 'Saving…' : 'Save baseline'}
             </Button>

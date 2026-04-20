@@ -33,7 +33,7 @@ function CustomTooltip({
   const fmt = (n: number) => `${n >= 0 ? '+' : ''}$${Math.abs(n).toFixed(2)}`
 
   return (
-    <div className="bg-white border border-gray-200 shadow-sm rounded-lg px-3 py-2 text-xs font-mono space-y-1">
+    <div className="bg-white border border-gray-200 shadow-sm rounded-lg px-3 py-2 text-xs space-y-1">
       <div className="text-gray-500">Hand #{d.handIndex}</div>
       <div style={{ color: netColor }} className="text-sm font-semibold">
         {fmt(d.cumNet)} <span className="text-gray-400 font-normal text-xs">actual</span>
@@ -67,7 +67,7 @@ export function SessionGraph({ result, title = 'Session Graph' }: Props) {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xs text-gray-500 uppercase tracking-wider">{title}</h2>
         {hasEV && (
-          <div className="flex items-center gap-4 text-xs font-mono">
+          <div className="flex items-center gap-4 text-xs">
             <span className="flex items-center gap-1.5">
               <span className="inline-block w-4 h-0.5" style={{ backgroundColor: actualColor }} />
               <span className="text-gray-600">Actual</span>

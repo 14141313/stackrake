@@ -69,7 +69,7 @@ export function UploadZone({ onResult }: Props) {
   if (state === 'idle') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
-        <h1 className="text-2xl font-mono text-gray-900 mb-1">Stackrake</h1>
+        <h1 className="text-2xl text-gray-900 mb-1">Stackrake</h1>
         <p className="text-gray-500 text-sm mb-10">PLO analytics · GGPoker & Natural8 · Client-side</p>
 
         <div
@@ -100,14 +100,14 @@ export function UploadZone({ onResult }: Props) {
   if (state === 'parsing') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
-        <div className="text-gray-400 font-mono text-sm animate-pulse">Parsing {fileNames.length} file{fileNames.length !== 1 ? 's' : ''}…</div>
+        <div className="text-gray-400 text-sm animate-pulse">Parsing {fileNames.length} file{fileNames.length !== 1 ? 's' : ''}…</div>
       </div>
     )
   }
 
   // done
   return (
-    <div className="flex items-center justify-between mb-6 text-xs text-gray-500 font-mono">
+    <div className="flex items-center justify-between mb-6 text-xs text-gray-500">
       <div className="flex gap-4 flex-wrap">
         <span className="text-gray-600">{fileNames.length} file{fileNames.length !== 1 ? 's' : ''}</span>
         <span>{handCount.toLocaleString()} hands parsed</span>

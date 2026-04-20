@@ -52,7 +52,7 @@ export function SettingsModal({ currentTier, userEmail, onSave, onClose }: Props
         {/* Account info */}
         <div className="mb-6 pb-6 border-b border-gray-100">
           <p className="text-xs text-gray-500 mb-1">Signed in as</p>
-          <p className="text-sm font-mono text-gray-700">{userEmail}</p>
+          <p className="text-sm text-gray-700">{userEmail}</p>
         </div>
 
         {/* Ocean Rewards Tier */}
@@ -68,7 +68,7 @@ export function SettingsModal({ currentTier, userEmail, onSave, onClose }: Props
               <button
                 key={t.name}
                 onClick={() => { setSelectedTier(t.name); setSaved(false) }}
-                className={`px-3 py-1.5 rounded-full text-xs font-mono border transition-colors ${
+                className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
                   selectedTier === t.name
                     ? 'border-brand text-brand bg-brand-light'
                     : 'border-gray-200 text-gray-500 hover:border-brand/50 hover:text-brand'
@@ -83,7 +83,7 @@ export function SettingsModal({ currentTier, userEmail, onSave, onClose }: Props
           {(() => {
             const cfg = OCEAN_TIERS.find(t => t.name === selectedTier)!
             return (
-              <div className="p-3 rounded-lg bg-gray-50 border border-gray-100 text-xs font-mono mb-4">
+              <div className="p-3 rounded-lg bg-gray-50 border border-gray-100 text-xs mb-4">
                 <span className="text-brand">{selectedTier}</span>
                 <span className="text-gray-400 mx-2">·</span>
                 <span className="text-gray-600">{Math.round(cfg.pct * 100)}% rakeback</span>
@@ -112,11 +112,10 @@ export function SettingsModal({ currentTier, userEmail, onSave, onClose }: Props
           variant="solid"
           onClick={handleSave}
           disabled={loading || (!hasChanged && !saved) || (saved && !hasChanged)}
-          className="font-mono"
         >
           {loading ? 'Saving…' : saved && !hasChanged ? '✓ Saved' : 'Save Tier'}
         </Button>
-        <Button variant="plain" onClick={onClose} className="font-mono">
+        <Button variant="plain" onClick={onClose}>
           Cancel
         </Button>
       </DialogActions>

@@ -38,7 +38,7 @@ export function AuthPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-900">
         <div className="w-full max-w-sm text-center">
-          <h1 className="text-2xl font-mono text-gray-900 mb-2">Check your email</h1>
+          <h1 className="text-2xl text-gray-900 mb-2">Check your email</h1>
           <p className="text-gray-500 text-sm mb-6">
             We sent a confirmation link to <span className="text-gray-700">{email}</span>.
             Click it to activate your account, then sign in.
@@ -58,7 +58,7 @@ export function AuthPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-900">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-mono text-gray-900 mb-1">Stackrake</h1>
+          <h1 className="text-2xl text-gray-900 mb-1">Stackrake</h1>
           <p className="text-gray-500 text-sm">PLO analytics · GGPoker & Natural8 · Client-side</p>
         </div>
 
@@ -68,7 +68,7 @@ export function AuthPage() {
             <button
               key={m}
               onClick={() => { setMode(m); setError(null) }}
-              className={`flex-1 py-2 text-xs font-mono transition-colors ${
+              className={`flex-1 py-2 text-xs transition-colors ${
                 mode === m ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -86,7 +86,6 @@ export function AuthPage() {
               autoComplete="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="font-mono"
               placeholder="you@example.com"
             />
           </Field>
@@ -100,7 +99,6 @@ export function AuthPage() {
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="font-mono"
               placeholder="••••••••"
             />
           </Field>
@@ -111,7 +109,7 @@ export function AuthPage() {
             type="submit"
             variant="solid"
             disabled={loading}
-            className="w-full py-2.5 font-mono"
+            className="w-full py-2.5"
           >
             {loading ? '…' : mode === 'signin' ? 'Sign In' : 'Create Account'}
           </Button>

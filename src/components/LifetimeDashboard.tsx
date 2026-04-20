@@ -12,7 +12,6 @@ interface Props {
   snapshots: GemSnapshot[]
   tier: TierName
   onView: (recordId: string, stakeKey: string | null) => void
-  onDelete: (recordId: string) => void
   onUpload: () => void
 }
 
@@ -41,14 +40,14 @@ function Card({
   return (
     <div className="bg-white rounded-xl p-4 flex flex-col gap-1 min-w-0 border border-gray-100 shadow-sm">
       <span className="text-xs text-gray-500 uppercase tracking-wider">{label}</span>
-      <span className={`font-mono text-xl ${valueColor ?? 'text-gray-900'}`}>{value}</span>
-      {sub && <span className="text-xs text-gray-500 font-mono">{sub}</span>}
+      <span className={`text-xl ${valueColor ?? 'text-gray-900'}`}>{value}</span>
+      {sub && <span className="text-xs text-gray-500">{sub}</span>}
       {children}
     </div>
   )
 }
 
-export function LifetimeDashboard({ records, snapshots, tier, onView, onDelete, onUpload }: Props) {
+export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }: Props) {
   // Combine all hands across all records into one lifetime result
   const lifetimeResult: SessionResult | null = useMemo(() => {
     if (records.length === 0) return null
@@ -99,7 +98,7 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onDelete, 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-mono text-gray-900">Dashboard</h1>
+          <h1 className="text-lg text-gray-900">Dashboard</h1>
           <p className="text-xs text-gray-500 mt-0.5">
             {handsPlayed.toLocaleString()} hands · {fmtDuration(durationMinutes)} · {records.length} session{records.length !== 1 ? 's' : ''}
           </p>
@@ -107,7 +106,7 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onDelete, 
         <Button
           variant="outline"
           onClick={onUpload}
-          className="text-xs font-mono"
+          className="text-xs"
         >
           + Upload Session
         </Button>
@@ -149,11 +148,11 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onDelete, 
         {/* True BB/100 tile — static tier display, no inline selector */}
         <div className="bg-white rounded-xl p-4 flex flex-col gap-1 min-w-0 border border-gray-100 shadow-sm">
           <span className="text-xs text-gray-500 uppercase tracking-wider">True BB/100</span>
-          <span className={`font-mono text-xl ${trueColor}`}>
+          <span className={`text-xl ${trueColor}`}>
             {trueBB100 >= 0 ? '+' : ''}{trueBB100.toFixed(1)}
           </span>
-          <span className="text-xs text-gray-500 font-mono">incl. rakeback + GEMs</span>
-          <span className="text-xs text-brand/70 font-mono mt-0.5">
+          <span className="text-xs text-gray-500">incl. rakeback + GEMs</span>
+          <span className="text-xs text-brand/70 mt-0.5">
             {tier} · x{tierCfg.multiplier}
           </span>
         </div>
@@ -166,7 +165,7 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onDelete, 
       <SessionLibrary
         records={records}
         onView={onView}
-        onDelete={onDelete}
+
         onUpload={onUpload}
         hideDashboard
       />

@@ -237,7 +237,7 @@ export default function App() {
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <p className="text-gray-500 font-mono text-sm animate-pulse">Loading…</p>
+        <p className="text-gray-500 text-sm animate-pulse">Loading…</p>
       </div>
     )
   }
@@ -297,17 +297,17 @@ export default function App() {
 
         {/* Header bar with user info + settings + sign out */}
         <div className="flex items-center justify-between mb-6">
-          <span className="text-xs font-mono text-gray-500">{user.email}</span>
+          <span className="text-xs text-gray-400">{user.email}</span>
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowSettings(true)}
-              className="text-xs font-mono text-gray-400 hover:text-gray-700 transition-colors"
+              className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
             >
               Settings
             </button>
             <button
               onClick={handleSignOut}
-              className="text-xs font-mono text-gray-400 hover:text-gray-700 transition-colors"
+              className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
             >
               Sign out
             </button>
@@ -316,7 +316,7 @@ export default function App() {
 
         {/* Cloud error banner */}
         {cloudError && (
-          <div className="mb-4 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600 font-mono flex items-center justify-between">
+          <div className="mb-4 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600 flex items-center justify-between">
             <span>{cloudError}</span>
             <button onClick={() => setCloudError(null)} className="ml-4 hover:text-red-500">✕</button>
           </div>
@@ -325,7 +325,7 @@ export default function App() {
         {/* Parsing spinner */}
         {uploading && (
           <div className="flex items-center justify-center min-h-[55vh]">
-            <p className="text-gray-400 font-mono text-sm animate-pulse">Parsing files…</p>
+            <p className="text-gray-400 text-sm animate-pulse">Parsing files…</p>
           </div>
         )}
 
@@ -343,14 +343,12 @@ export default function App() {
                 snapshots={gemSnapshots}
                 tier={tier}
                 onView={handleView}
-                onDelete={handleDelete}
                 onUpload={() => inputRef.current?.click()}
               />
             ) : (
               <SessionLibrary
                 records={records}
                 onView={handleView}
-                onDelete={handleDelete}
                 onUpload={() => inputRef.current?.click()}
               />
             )}
@@ -361,11 +359,11 @@ export default function App() {
         {!uploading && view === 'session' && activeResult && rec !== null && (
           <>
             {/* Nav bar */}
-            <div className="flex items-center justify-between mb-6 text-xs font-mono">
+            <div className="flex items-center justify-between mb-6 text-xs">
               <Button
                 variant="plain"
                 onClick={() => setView('library')}
-                className="text-gray-500 hover:text-gray-700 font-mono text-xs"
+                className="text-gray-500 hover:text-gray-700 text-xs"
               >
                 ← Sessions
               </Button>
@@ -406,6 +404,13 @@ export default function App() {
                 <span className="text-gray-300 ml-2">
                   {rec.fileNames.length} file{rec.fileNames.length !== 1 ? 's' : ''}
                 </span>
+                <Button
+                  variant="plain"
+                  onClick={() => handleDelete(rec.id)}
+                  className="text-xs text-gray-400 hover:text-negative px-2 py-1"
+                >
+                  Delete session
+                </Button>
                 <button
                   onClick={() => setView('library')}
                   className="text-gray-400 hover:text-gray-700 transition-colors ml-1"

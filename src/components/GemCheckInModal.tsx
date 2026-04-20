@@ -88,7 +88,6 @@ export function GemCheckInModal({ onComplete, onDismiss }: Props) {
             placeholder="e.g. 12500"
             value={balance}
             onChange={e => setBalance(e.target.value)}
-            className="font-mono"
           />
         </Field>
 
@@ -103,7 +102,6 @@ export function GemCheckInModal({ onComplete, onDismiss }: Props) {
             placeholder="e.g. 5000"
             value={redeemed}
             onChange={e => setRedeemed(e.target.value)}
-            className="font-mono"
           />
         </Field>
 
@@ -114,7 +112,7 @@ export function GemCheckInModal({ onComplete, onDismiss }: Props) {
             type="submit"
             variant="solid"
             disabled={loading}
-            className="flex-1 py-2.5 font-mono"
+            className="flex-1 py-2.5"
           >
             {loading ? 'Saving…' : 'Save Check-in'}
           </Button>
@@ -122,7 +120,7 @@ export function GemCheckInModal({ onComplete, onDismiss }: Props) {
             type="button"
             variant="outline"
             onClick={onDismiss}
-            className="px-4 py-2.5 font-mono"
+            className="px-4 py-2.5"
           >
             Later
           </Button>
