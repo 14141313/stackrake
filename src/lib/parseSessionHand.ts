@@ -14,7 +14,7 @@ const BUTTON_RE = /^Table .+ Seat #(\d+) is the button/
 const FLOP_RE = /^\*\*\* FLOP \*\*\* \[(\S+) (\S+) (\S+)\]/
 const TURN_RE = /^\*\*\* TURN \*\*\* \[.+\] \[(\S+)\]/
 const RIVER_RE = /^\*\*\* RIVER \*\*\* \[.+\] \[(\S+)\]/
-const TOTAL_POT_RE = /Total pot \$?([\d.]+)[^|]*\|\s*Rake \$?([\d.]+)(?:\s*\|\s*Jackpot \$?([\d.]+))?(?:\s*\|\s*Bingo \$?([\d.]+))?(?:\s*\|\s*Fortune \$?([\d.]+))?(?:\s*\|\s*Tax \$?([\d.]+))?/
+const TOTAL_POT_RE = /Total pot \$?([\d.]+).*?\|\s*Rake \$?([\d.]+)(?:\s*\|\s*Jackpot \$?([\d.]+))?(?:\s*\|\s*Bingo \$?([\d.]+))?(?:\s*\|\s*Fortune \$?([\d.]+))?(?:\s*\|\s*Tax \$?([\d.]+))?/
 const HOLE_CARDS_RE = /Dealt to Hero \[(.+?)\]/
 // Hero's collected amount from summary
 const HERO_WON_RE = /^Seat \d+: Hero .*?(?:won|collected) \(\$?([\d.]+)\)/
