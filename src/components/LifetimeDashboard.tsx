@@ -55,6 +55,17 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
     return allHands.length > 0 ? analyseSession(allHands) : null
   }, [records])
 
+  // Sum of per-session play time (avoids counting calendar gaps between sessions)
+  const totalPlayMinutes = useMemo(() => {
+    return records.reduce((sum, rec) => {
+      if (rec.hands.length < 2) return sum
+      const timestamps = rec.hands.map(h => h.timestamp)
+      const first = Math.min(...timestamps)
+      const last = Math.max(...timestamps)
+      return sum + (last - first) / 60_000
+    }, 0)
+  }, [records])
+
   // Total GEM cashback from snapshots
   const totalGemCash = useMemo(() => {
     const sorted = [...snapshots].sort((a, b) => a.month.localeCompare(b.month))
@@ -83,12 +94,17 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
     ? Math.round(((netResult + rakeback + totalGemCash) / primaryBB / handsPlayed) * 100 * 10) / 10
     : 0
 
+  // $/hour using summed session durations (not calendar span)
+  const lifetimeDollarsPerHour = totalPlayMinutes > 0
+    ? Math.round((netResult / (totalPlayMinutes / 60)) * 100) / 100
+    : 0
+
   const vpipPct = handsPlayed > 0 ? Math.round((vpipHands / handsPlayed) * 100) : 0
   const stakeLabel = stakes.map(s => `$${s.sb}/$${s.bb}`).join(', ')
 
   const netColor = netResult > 0 ? 'text-positive' : netResult < 0 ? 'text-negative' : 'text-gray-900'
   const bbColor = bbPer100 > 0 ? 'text-positive' : bbPer100 < 0 ? 'text-negative' : 'text-gray-900'
-  const hrColor = dollarsPerHour > 0 ? 'text-positive' : dollarsPerHour < 0 ? 'text-negative' : 'text-gray-900'
+  const hrColor = lifetimeDollarsPerHour > 0 ? 'text-positive' : lifetimeDollarsPerHour < 0 ? 'text-negative' : 'text-gray-900'
   const trueColor = trueBB100 > 0 ? 'text-positive' : trueBB100 < 0 ? 'text-negative' : 'text-gray-900'
 
   return (
@@ -98,7 +114,7 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
         <div>
           <h1 className="text-lg text-gray-900">Dashboard</h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            {handsPlayed.toLocaleString()} hands · {fmtDuration(durationMinutes)} · {records.length} session{records.length !== 1 ? 's' : ''}
+            {handsPlayed.toLocaleString()} hands · {fmtDuration(totalPlayMinutes)} · {records.length} session{records.length !== 1 ? 's' : ''}
           </p>
         </div>
         <Button
@@ -126,8 +142,8 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
         />
         <Card
           label="$ / Hour"
-          value={`${dollarsPerHour >= 0 ? '+' : '-'}$${Math.abs(dollarsPerHour).toFixed(2)}`}
-          sub={fmtDuration(durationMinutes)}
+          value={`${lifetimeDollarsPerHour >= 0 ? '+' : '-'}$${Math.abs(lifetimeDollarsPerHour).toFixed(2)}`}
+          sub={fmtDuration(totalPlayMinutes)}
           valueColor={hrColor}
         />
         <Card
