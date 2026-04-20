@@ -71,19 +71,16 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
     netResult, grossResult, totalHeroRake,
     handsPlayed, vpipHands, bbPer100,
     dollarsPerHour, durationMinutes, stakes,
-    runItTwiceHands, runItThreeHands,
+    runItTwiceHands, runItThreeHands, primaryBB,
   } = lifetimeResult
 
   const tierCfg = getTierConfig(tier)
   const rakeback = totalHeroRake * tierCfg.pct
-  const primaryBB = stakes.length > 0
-    ? stakes.reduce((best, s) => s.bb > best ? s.bb : best, 0)
-    : 0.5
 
-  // True BB/100 = (net + rakeback + gem cashback) / primaryBB / hands * 100
-  const trueNet = netResult + rakeback + totalGemCash
+  // True BB/100: add rakeback + GEM cashback converted to BB/100 using the same
+  // primaryBB that analyseSession used for bbPer100 — so the delta is directly comparable.
   const trueBB100 = primaryBB > 0 && handsPlayed > 0
-    ? Math.round((trueNet / primaryBB / handsPlayed) * 100 * 10) / 10
+    ? Math.round(((netResult + rakeback + totalGemCash) / primaryBB / handsPlayed) * 100 * 10) / 10
     : 0
 
   const vpipPct = handsPlayed > 0 ? Math.round((vpipHands / handsPlayed) * 100) : 0
@@ -129,7 +126,7 @@ export function LifetimeDashboard({ records, snapshots, tier, onView, onUpload }
         />
         <Card
           label="$ / Hour"
-          value={`${dollarsPerHour >= 0 ? '+' : ''}$${Math.abs(dollarsPerHour).toFixed(2)}`}
+          value={`${dollarsPerHour >= 0 ? '+' : '-'}$${Math.abs(dollarsPerHour).toFixed(2)}`}
           sub={fmtDuration(durationMinutes)}
           valueColor={hrColor}
         />

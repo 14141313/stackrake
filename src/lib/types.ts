@@ -120,6 +120,8 @@ export interface SessionResult {
   rakeAnomalyHands: Array<{ handId: string; reported: number; expected: number }>
   handsPlayed: number
   vpipHands: number
+  /** the big blind value used as the BB denominator (most common BB across hands) */
+  primaryBB: number
   /** net / bigBlind */
   bbWon: number
   /** (bbWon / handsPlayed) * 100 */
